@@ -1,6 +1,4 @@
-import type { AddressRequest } from "@/types/common";
-
-type NullablePartial<T> = { [K in keyof T]?: T[K] | null };
+import type { AddressRequest, NullablePartial } from "@/types/common";
 
 export type SpaceUpdateRequest = {
   name?: string | null;
