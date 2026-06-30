@@ -1,9 +1,7 @@
 import { apiClient } from "@/apis/client";
+import { clearAuthTokens } from "@/apis/auth/tokenStorage";
 
 export const deleteMyAccount = async (): Promise<void> => {
   await apiClient.delete("/users/me");
-  if (typeof window !== "undefined") {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-  }
+  clearAuthTokens();
 };

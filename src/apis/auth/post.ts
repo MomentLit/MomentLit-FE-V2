@@ -1,4 +1,5 @@
 import { apiClient } from "@/apis/client";
+import { clearAuthTokens } from "@/apis/auth/tokenStorage";
 import type {
   RefreshRequest,
   RefreshResponse,
@@ -19,10 +20,10 @@ export const signIn = async (
 };
 
 export const signOut = async (body: SignOutRequest): Promise<void> => {
-  await apiClient.post("/auth/signout", body);
-  if (typeof window !== "undefined") {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
+  try {
+    await apiClient.post("/auth/signout", body);
+  } finally {
+    clearAuthTokens();
   }
 };
 

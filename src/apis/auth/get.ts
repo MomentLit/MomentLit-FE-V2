@@ -3,12 +3,18 @@ import type { OAuthGoogleCallbackResponse } from "@/types/auth";
 import type { ApiResponse } from "@/types/common";
 
 export const oauthGoogle = async (state?: string): Promise<void> => {
+  if (typeof window === "undefined") {
+    throw new Error("oauthGoogle is only available in the browser");
+  }
+
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (!baseUrl) {
     throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
   }
-  const params = state ? `?state=${encodeURIComponent(state)}` : "";
-  window.location.href = `${baseUrl}/auth/oauth/google${params}`;
+
+  const params = new URLSearchParams(state ? { state } : undefined);
+  const query = params.toString();
+  window.location.href = `${baseUrl}/auth/oauth/google${query ? `?${query}` : ""}`;
 };
 
 export const oauthGoogleCallback = async (
