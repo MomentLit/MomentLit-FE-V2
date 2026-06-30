@@ -1,0 +1,1 @@
+export { getSpacePopupHistory } from "./get";
