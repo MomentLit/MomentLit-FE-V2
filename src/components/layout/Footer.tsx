@@ -1,4 +1,4 @@
-import { cn } from "@/src/utils/cn";
+import { cn } from "@/utils/cn";
 
 import BrandIcon from "../ui/BrandIcon";
 

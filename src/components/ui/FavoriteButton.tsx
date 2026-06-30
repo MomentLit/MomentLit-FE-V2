@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 
-import { cn } from "@/src/utils/cn";
+import { cn } from "@/utils/cn";
 
 type FavoriteButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   active?: boolean;

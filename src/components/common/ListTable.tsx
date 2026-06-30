@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { cn } from "@/src/utils/cn";
+import { cn } from "@/utils/cn";
 
 type ListTableProps = {
   headers?: string[];

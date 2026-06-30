@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-import { cn } from "@/src/utils/cn";
+import { cn } from "@/utils/cn";
 
 type FilterChipProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   active?: boolean;

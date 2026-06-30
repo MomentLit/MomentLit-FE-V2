@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from "react";
 
-import { cn } from "@/src/utils/cn";
+import { cn } from "@/utils/cn";
 
 type BaseProps = {
   label?: ReactNode;

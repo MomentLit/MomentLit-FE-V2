@@ -1,6 +1,6 @@
-import Button from "@/src/components/common/Button";
-import FilterChip from "@/src/components/common/FilterChip";
-import { cn } from "@/src/utils/cn";
+import Button from "@/components/common/Button";
+import FilterChip from "@/components/common/FilterChip";
+import { cn } from "@/utils/cn";
 
 import BellIcon from "../ui/BellIcon";
 import BrandIcon from "../ui/BrandIcon";
