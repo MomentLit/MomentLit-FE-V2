@@ -9,9 +9,9 @@
 코드를 생성하거나 수정하기 전에 반드시 아래 문서를 먼저 확인한다.
 
 ```text
-Architecture.md
-design-system.md
-router.md
+docs/Architecture.md
+docs/design-system.md
+docs/router.md
 ```
 
 ## 2. 반드시 참고해야 하는 문서
