@@ -14,6 +14,7 @@
 - 타입 정의는 `types`에 둔다.
 - 공통 유틸 함수는 `utils`에 둔다.
 - 앱 초기 설정은 `app`에서 관리한다.
+- 스타일링은 Tailwind CSS utility class를 기본으로 사용한다.
 
 ---
 
@@ -35,6 +36,26 @@ src
 ---
 
 ## 3. 폴더별 역할
+
+## 3.0 스타일링
+
+본 프로젝트의 UI 스타일링은 Tailwind CSS를 기준으로 작성한다.
+
+### 역할
+
+* 컴포넌트 단위 스타일 작성
+* 반응형 레이아웃 작성
+* hover, active, disabled 같은 UI 상태 표현
+* 디자인 시스템 토큰을 utility class로 매핑
+
+### 규칙
+
+* 새로운 CSS-in-JS, CSS Module, 별도 스타일 라이브러리를 임의로 추가하지 않는다.
+* Tailwind arbitrary value는 Figma 구현에 꼭 필요한 경우에만 사용한다.
+* 색상, 여백, radius, typography 값은 `docs/design-system.md`에 정의된 기준을 우선한다.
+* 공통으로 반복되는 조합은 `components`의 재사용 컴포넌트로 분리한다.
+
+---
 
 ## 3.1 `apis`
 
