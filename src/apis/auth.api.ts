@@ -21,6 +21,10 @@ export const signIn = async (
 
 export const signOut = async (body: SignOutRequest): Promise<void> => {
   await apiClient.post("/auth/signout", body);
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+  }
 };
 
 export const refresh = async (
@@ -34,8 +38,12 @@ export const refresh = async (
 };
 
 export const oauthGoogle = async (state?: string): Promise<void> => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (!baseUrl) {
+    throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
+  }
   const params = state ? `?state=${encodeURIComponent(state)}` : "";
-  window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/oauth/google${params}`;
+  window.location.href = `${baseUrl}/auth/oauth/google${params}`;
 };
 
 export const oauthGoogleCallback = async (

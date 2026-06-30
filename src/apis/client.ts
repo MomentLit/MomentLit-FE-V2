@@ -19,6 +19,8 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+let refreshPromise: Promise<string> | null = null;
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -34,16 +36,24 @@ apiClient.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
-            refresh_token: refreshToken,
-          });
+          if (!refreshPromise) {
+            refreshPromise = axios
+              .post(`${BASE_URL}/auth/refresh`, {
+                refresh_token: refreshToken,
+              })
+              .then((res) => {
+                const newAccessToken = res.data.data.access_token;
+                const newRefreshToken = res.data.data.refresh_token;
+                localStorage.setItem("access_token", newAccessToken);
+                localStorage.setItem("refresh_token", newRefreshToken);
+                return newAccessToken;
+              })
+              .finally(() => {
+                refreshPromise = null;
+              });
+          }
 
-          const newAccessToken = data.data.access_token;
-          const newRefreshToken = data.data.refresh_token;
-
-          localStorage.setItem("access_token", newAccessToken);
-          localStorage.setItem("refresh_token", newRefreshToken);
-
+          const newAccessToken = await refreshPromise;
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return apiClient(originalRequest);
         } catch {

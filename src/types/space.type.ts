@@ -15,20 +15,12 @@ export type SpaceCreateResponse = {
   space_id: number;
 };
 
+type NullablePartial<T> = { [K in keyof T]?: T[K] | null };
+
 export type SpaceUpdateRequest = {
   name?: string | null;
   description?: string | null;
-  address?: {
-    sido?: string | null;
-    sigungu?: string | null;
-    eup_myeon_dong?: string | null;
-    road_address?: string | null;
-    jibun_address?: string | null;
-    detail_address?: string | null;
-    postal_code?: string | null;
-    lat?: number | null;
-    lng?: number | null;
-  } | null;
+  address?: NullablePartial<AddressRequest> | null;
   ai_summary?: string | null;
   thumbnail_url?: string | null;
   image_urls?: (string | null)[] | null;

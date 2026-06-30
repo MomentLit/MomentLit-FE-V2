@@ -35,13 +35,13 @@ export const getSentMatchings = async (): Promise<
 };
 
 export const approveMatching = async (matchingId: string): Promise<void> => {
-  await apiClient.patch(`/matchings/${matchingId}/approve`);
+  await apiClient.patch(`/matchings/${encodeURIComponent(matchingId)}/approve`);
 };
 
 export const rejectMatching = async (matchingId: string): Promise<void> => {
-  await apiClient.patch(`/matchings/${matchingId}/reject`);
+  await apiClient.patch(`/matchings/${encodeURIComponent(matchingId)}/reject`);
 };
 
 export const cancelMatching = async (matchingId: string): Promise<void> => {
-  await apiClient.patch(`/matchings/${matchingId}/cancel`);
+  await apiClient.patch(`/matchings/${encodeURIComponent(matchingId)}/cancel`);
 };
