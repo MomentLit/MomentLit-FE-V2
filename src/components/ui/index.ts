@@ -1,5 +1,10 @@
 export { default as ArrowButton } from "./ArrowButton";
 export { default as BellIcon } from "./BellIcon";
 export { default as BrandIcon } from "./BrandIcon";
+export { default as BigCard } from "./BigCard";
 export { default as DefaultProfile } from "./DefaultProfile";
+export { default as FavoriteButton } from "./FavoriteButton";
+export { default as MarkerIcon } from "./MarkerIcon";
 export { default as MessageIcon } from "./MessageIcon";
+export { default as PopupCard } from "./PopupCard";
+export { default as SpaceCard } from "./SpaceCard";
