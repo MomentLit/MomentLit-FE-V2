@@ -30,7 +30,7 @@ type LinkButtonProps = SharedButtonProps &
 type ButtonProps = NativeButtonProps | LinkButtonProps;
 
 const baseClass =
-  "inline-flex items-center justify-center whitespace-nowrap rounded-[12px] px-[20px] py-[16px] text-center text-[16px] font-bold leading-[1.3] transition-colors disabled:cursor-not-allowed";
+  "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[12px] px-[20px] py-[16px] text-center text-[16px] font-bold leading-[1.3] transition-colors disabled:cursor-not-allowed";
 
 const variantClass: Record<ButtonVariant, string> = {
   primary:

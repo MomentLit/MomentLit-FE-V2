@@ -1,5 +1,10 @@
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
+export const AUTH_CHANGE_EVENT = "momentlit-auth-change";
+
+const notifyAuthChange = (): void => {
+  window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+};
 
 export const getAccessToken = (): string | null => {
   if (typeof window === "undefined") return null;
@@ -18,10 +23,12 @@ export const setAuthTokens = (
   if (typeof window === "undefined") return;
   localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  notifyAuthChange();
 };
 
 export const clearAuthTokens = (): void => {
   if (typeof window === "undefined") return;
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
+  notifyAuthChange();
 };

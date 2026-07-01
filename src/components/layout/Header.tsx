@@ -1,18 +1,34 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
+import { AUTH_CHANGE_EVENT, getAccessToken } from "@/apis/auth/tokenStorage";
 import Button from "@/components/common/Button";
 import FilterChip from "@/components/common/FilterChip";
+import MyPageDropdown from "@/features/user/components/MyPageDropdown";
+import { useMyPageMenu } from "@/features/user/hooks/useMyPageMenu";
 import { cn } from "@/utils/cn";
 
-import BellIcon from "../ui/BellIcon";
+import AlertDropdown from "../ui/AlertDropdown";
+import type { AlertItem } from "../ui/AlertDropdown";
+import BellIcon from "../ui/AlertIcon";
 import DefaultProfile from "../ui/DefaultProfile";
+import MessageDropdown from "../ui/MessageDropdown";
+import type { MessageItem } from "../ui/MessageDropdown";
 import MessageIcon from "../ui/MessageIcon";
 
 type HeaderType = "top" | "topSearch" | "landing" | "unauth" | "scroll" | "noSearch";
 
 type HeaderProps = {
   type?: HeaderType;
+  alerts?: AlertItem[];
+  alertError?: string | null;
+  alertsLoading?: boolean;
+  messages?: MessageItem[];
+  messageError?: string | null;
+  messagesLoading?: boolean;
   className?: string;
 };
 
@@ -22,18 +38,75 @@ const navItems = [
   { href: "#", label: "AI 공간 매칭" },
 ];
 
-export default function Header({ type = "top", className }: HeaderProps) {
+const subscribeToAuth = (onStoreChange: () => void) => {
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === "access_token") onStoreChange();
+  };
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(AUTH_CHANGE_EVENT, onStoreChange);
+
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(AUTH_CHANGE_EVENT, onStoreChange);
+  };
+};
+
+const getAuthSnapshot = () => Boolean(getAccessToken());
+const getServerAuthSnapshot = () => false;
+
+export default function Header({
+  type = "top",
+  alerts = [],
+  alertError,
+  alertsLoading = false,
+  messages = [],
+  messageError,
+  messagesLoading = false,
+  className,
+}: HeaderProps) {
+  const [activeDropdown, setActiveDropdown] = useState<"alert" | "message" | "profile" | null>(null);
+  const {
+    handleSignOut,
+    isProfileLoading,
+    isSigningOut,
+    loadProfile,
+    profile,
+    profileError,
+  } = useMyPageMenu();
+  const isAuthenticated = useSyncExternalStore(
+    subscribeToAuth,
+    getAuthSnapshot,
+    getServerAuthSnapshot,
+  );
+  const actionsRef = useRef<HTMLDivElement>(null);
   const showNav = type !== "scroll" && type !== "noSearch";
   const showSearch = type === "top" || type === "topSearch" || type === "scroll";
   const showFilters = type === "topSearch";
-  const showAuth = type === "unauth";
-  const showActions = type !== "unauth";
+  const showAuth = type === "unauth" || !isAuthenticated;
+  const showActions = type !== "unauth" && isAuthenticated;
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!actionsRef.current?.contains(event.target as Node)) setActiveDropdown(null);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActiveDropdown(null);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   return (
-    <header className={cn("w-full border-b border-[#D0D3DB]", type === "unauth" ? "bg-[#F8FBFB]" : "bg-[#FFFFFF]", className)}>
+    <header className={cn("relative z-50 w-full border-b border-[#D0D3DB]", type === "unauth" ? "bg-[#F8FBFB]" : "bg-[#FFFFFF]", className)}>
       <div className="flex h-[64px] w-full items-center justify-between px-[20px]">
-        <Link className="flex h-[40px] w-[172px] items-center" aria-label="MomentLit 홈" href="/main">
-          <Image alt="" aria-hidden height={27} src="/icons/icon.svg" width={42} />
+        <Link className="flex h-[48px] w-[172px] cursor-pointer items-center" aria-label="MomentLit 홈" href="/main">
+          <Image alt="" aria-hidden height={48} src="/icons/icon.svg" width={48} />
         </Link>
         {showNav && (
           <nav className="hidden h-[64px] items-center gap-[4px] md:flex" aria-label="주요 메뉴">
@@ -64,10 +137,70 @@ export default function Header({ type = "top", className }: HeaderProps) {
           </div>
         ) : (
           showActions && (
-            <div className="flex w-[164px] items-center justify-end gap-[20px]">
-              <BellIcon />
-              <MessageIcon />
-              <DefaultProfile className="size-[32px]" />
+            <div className="flex w-[164px] items-center justify-end gap-[20px]" ref={actionsRef}>
+              <div className="relative">
+                <button
+                  aria-expanded={activeDropdown === "alert"}
+                  aria-label="알림 보기"
+                  className="grid size-[32px] cursor-pointer place-items-center"
+                  onClick={() => setActiveDropdown((current) => current === "alert" ? null : "alert")}
+                  type="button"
+                >
+                  <BellIcon alert={alerts.some((item) => item.unread)} className="size-[32px]" />
+                </button>
+                {activeDropdown === "alert" && (
+                  <AlertDropdown
+                    className="absolute right-0 top-[36px] z-50 shadow-[0_8px_24px_rgba(34,40,49,0.12)]"
+                    error={alertError}
+                    isLoading={alertsLoading}
+                    items={alerts}
+                  />
+                )}
+              </div>
+              <div className="relative">
+                <button
+                  aria-expanded={activeDropdown === "message"}
+                  aria-label="메시지 보기"
+                  className="grid size-[32px] cursor-pointer place-items-center"
+                  onClick={() => setActiveDropdown((current) => current === "message" ? null : "message")}
+                  type="button"
+                >
+                  <MessageIcon alert={messages.some((item) => item.unread)} className="size-[32px]" />
+                </button>
+                {activeDropdown === "message" && (
+                  <MessageDropdown
+                    className="absolute right-0 top-[36px] z-50 shadow-[0_8px_24px_rgba(34,40,49,0.12)]"
+                    error={messageError}
+                    isLoading={messagesLoading}
+                    items={messages}
+                  />
+                )}
+              </div>
+              <div className="relative">
+                <button
+                  aria-expanded={activeDropdown === "profile"}
+                  aria-label="마이페이지 메뉴 보기"
+                  className="grid size-[32px] cursor-pointer place-items-center"
+                  onClick={() => {
+                    const isOpening = activeDropdown !== "profile";
+                    setActiveDropdown(isOpening ? "profile" : null);
+                    if (isOpening) void loadProfile();
+                  }}
+                  type="button"
+                >
+                  <DefaultProfile className="size-[32px]" />
+                </button>
+                {activeDropdown === "profile" && (
+                  <MyPageDropdown
+                    className="absolute right-0 top-[36px] z-50 shadow-[0_8px_24px_rgba(34,40,49,0.12)]"
+                    error={profileError}
+                    isLoading={isProfileLoading}
+                    isSigningOut={isSigningOut}
+                    onSignOut={() => void handleSignOut()}
+                    profile={profile}
+                  />
+                )}
+              </div>
             </div>
           )
         )}
@@ -83,15 +216,18 @@ export default function Header({ type = "top", className }: HeaderProps) {
               ))}
             </div>
           )}
-          <label className={cn("flex max-w-full items-center gap-[14px] rounded-full border border-[#D0D3DB] bg-white py-[5px] pl-[18px] pr-[5px]", showFilters ? "w-[439px]" : "w-[650px]")}>
-            <span className="sr-only">검색어</span>
+          <div className={cn("flex max-w-full items-center gap-[14px] rounded-full border border-[#D0D3DB] bg-white py-[5px] pl-[18px] pr-[5px]", showFilters ? "w-[439px]" : "w-[650px]")}>
+            <label className="sr-only" htmlFor="header-search">검색어</label>
             <input
               className="min-w-0 flex-1 bg-transparent text-[16px] font-medium text-[#222831] outline-none placeholder:text-[#67728A]"
+              id="header-search"
               placeholder="검색어를 입력해주세요."
               type="search"
             />
-            <span className="grid size-[32px] place-items-center rounded-full bg-[#00ADB5] text-white">⌕</span>
-          </label>
+            <button aria-label="검색" className="grid size-[32px] cursor-pointer place-items-center" type="button">
+              <Image alt="" aria-hidden height={32} src="/icons/Search.svg" width={32} />
+            </button>
+          </div>
         </div>
       )}
     </header>
