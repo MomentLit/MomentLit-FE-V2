@@ -8,7 +8,14 @@ type BigCardProps = {
   address?: string;
   imageUrl?: string;
   overlay?: boolean;
+  size?: "small" | "medium" | "large";
   className?: string;
+};
+
+const sizeClasses = {
+  small: "h-[466px] w-[350px] max-md:h-[360px] max-md:w-[270px]",
+  medium: "h-[519px] w-[390px] max-md:h-[400px] max-md:w-[300px]",
+  large: "h-[559px] w-[420px] max-md:h-[448px] max-md:w-[calc(100vw-48px)]",
 };
 
 export default function BigCard({
@@ -17,12 +24,14 @@ export default function BigCard({
   address = "주소",
   imageUrl,
   overlay = false,
+  size = "small",
   className,
 }: BigCardProps) {
   return (
     <article
       className={cn(
-        "relative flex h-[466px] w-[350px] flex-col justify-end overflow-hidden rounded-[12px] bg-white bg-cover bg-center",
+        "relative flex shrink-0 flex-col justify-end overflow-hidden rounded-[12px] bg-white bg-cover bg-center",
+        sizeClasses[size],
         className,
       )}
       style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : undefined}

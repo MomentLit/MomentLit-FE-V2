@@ -73,7 +73,7 @@ export default function Header({ type = "top", className }: HeaderProps) {
         )}
       </div>
       {showSearch && (
-        <div className="flex w-full items-center justify-center gap-[24px] px-[20px] py-[5px]">
+        <div className="flex h-[64px] w-full items-center justify-center gap-[24px] px-[20px]">
           {showFilters && (
             <div className="flex gap-[8px]">
               {["지역", "유형", "수용 인원", "가격"].map((label) => (
@@ -83,7 +83,7 @@ export default function Header({ type = "top", className }: HeaderProps) {
               ))}
             </div>
           )}
-          <label className={cn("flex items-center gap-[14px] rounded-full border border-[#D0D3DB] bg-white py-[5px] pl-[18px] pr-[5px]", showFilters ? "w-[439px]" : "w-[650px]")}>
+          <label className={cn("flex max-w-full items-center gap-[14px] rounded-full border border-[#D0D3DB] bg-white py-[5px] pl-[18px] pr-[5px]", showFilters ? "w-[439px]" : "w-[650px]")}>
             <span className="sr-only">검색어</span>
             <input
               className="min-w-0 flex-1 bg-transparent text-[16px] font-medium text-[#222831] outline-none placeholder:text-[#67728A]"
