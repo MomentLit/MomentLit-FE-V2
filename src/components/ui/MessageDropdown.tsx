@@ -1,7 +1,7 @@
 import Button from "@/components/common/Button";
 import { cn } from "@/utils/cn";
 
-type MessageItem = {
+export type MessageItem = {
   sender: string;
   content: string;
   time: string;
@@ -10,16 +10,12 @@ type MessageItem = {
 
 type MessageDropdownProps = {
   items?: MessageItem[];
+  isLoading?: boolean;
+  error?: string | null;
   className?: string;
 };
 
-const defaultItems: MessageItem[] = [
-  { sender: "브랜드 팀", content: "성수 아트 라운지 일정 확인 가능할까요?", time: "방금 전", unread: true },
-  { sender: "호스트", content: "주말 반입 시간은 오전 10시부터 가능합니다.", time: "18분 전", unread: true },
-  { sender: "운영 지원", content: "등록해주신 공간 정보 검토가 완료되었습니다.", time: "어제" },
-];
-
-export default function MessageDropdown({ items = defaultItems, className }: MessageDropdownProps) {
+export default function MessageDropdown({ items = [], isLoading = false, error, className }: MessageDropdownProps) {
   const unreadCount = items.filter((item) => item.unread).length;
 
   return (
@@ -28,7 +24,12 @@ export default function MessageDropdown({ items = defaultItems, className }: Mes
         <h2 className="text-[18px] font-bold text-[#222831]">메시지</h2>
         <span className="rounded-full bg-[#E8F6F7] px-[10px] py-[6px] text-[12px] font-bold text-[#00ADB5]">미확인 {unreadCount}</span>
       </div>
-      {items.map((item) => (
+      {isLoading && <p className="grid flex-1 place-items-center text-[14px] text-[#67728A]">메시지를 불러오는 중입니다.</p>}
+      {!isLoading && error && <p className="grid flex-1 place-items-center text-center text-[14px] text-[#DA294A]">{error}</p>}
+      {!isLoading && !error && items.length === 0 && (
+        <p className="grid flex-1 place-items-center text-[14px] text-[#67728A]">메시지가 없습니다.</p>
+      )}
+      {!isLoading && !error && items.map((item) => (
         <article className={cn("flex gap-[10px] rounded-[12px] p-[12px]", item.unread ? "bg-[#F8FBFB]" : "bg-white")} key={item.sender}>
           <span className={cn("grid size-[36px] shrink-0 place-items-center rounded-full text-[14px] font-bold text-white", item.unread ? "bg-[#00ADB5]" : "bg-[#D0D3DB]")}>
             {item.sender[0]}
@@ -45,7 +46,7 @@ export default function MessageDropdown({ items = defaultItems, className }: Mes
           </div>
         </article>
       ))}
-      <Button className="h-[42px] w-full rounded-[12px] bg-[#222831] text-[14px] hover:bg-[#222831]" fullWidth size="custom">
+      <Button className="h-[42px] w-full rounded-[12px] bg-[#222831] text-[14px] hover:bg-[#222831]" disabled={isLoading} fullWidth size="custom">
         전체 메시지 보기
       </Button>
     </section>

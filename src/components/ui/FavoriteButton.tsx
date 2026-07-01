@@ -1,4 +1,8 @@
-import type { ButtonHTMLAttributes } from "react";
+"use client";
+
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import type { ButtonHTMLAttributes, MouseEvent } from "react";
 
 import { cn } from "@/utils/cn";
 
@@ -6,22 +10,49 @@ type FavoriteButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   active?: boolean;
 };
 
-export default function FavoriteButton({ active = false, className, ...props }: FavoriteButtonProps) {
+export default function FavoriteButton({ active = false, className, disabled, onClick, ...props }: FavoriteButtonProps) {
+  const [isActive, setIsActive] = useState(active);
+  const [isPopping, setIsPopping] = useState(false);
+  const animationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (animationTimerRef.current) clearTimeout(animationTimerRef.current);
+  }, []);
+
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (!disabled) {
+      setIsActive((current) => !current);
+      setIsPopping(true);
+      if (animationTimerRef.current) clearTimeout(animationTimerRef.current);
+      animationTimerRef.current = setTimeout(() => setIsPopping(false), 180);
+    }
+    onClick?.(event);
+  };
+
   return (
     <button
-      aria-label={active ? "좋아요 취소" : "좋아요"}
-      className={cn("grid size-[24px] place-items-center text-[#DA294A]", !active && "text-[#222831]", className)}
+      aria-label={isActive ? "좋아요 취소" : "좋아요"}
+      aria-pressed={isActive}
+      className={cn(
+        "grid size-[24px] cursor-pointer place-items-center transition-transform duration-150 active:scale-75 disabled:cursor-not-allowed motion-reduce:transition-none",
+        className,
+      )}
+      disabled={disabled}
+      onClick={handleClick}
       type="button"
       {...props}
     >
-      <svg aria-hidden="true" className="size-[24px]" fill={active ? "currentColor" : "none"} viewBox="0 0 24 24">
-        <path
-          d="M12 20.3c-4.9-4.3-8-7-8-10.6A4.5 4.5 0 0 1 8.5 5c1.5 0 2.7.7 3.5 1.8A4.2 4.2 0 0 1 15.5 5 4.5 4.5 0 0 1 20 9.7c0 3.6-3.1 6.3-8 10.6Z"
-          stroke="currentColor"
-          strokeLinejoin="round"
-          strokeWidth="2"
-        />
-      </svg>
+      <Image
+        alt=""
+        aria-hidden
+        className={cn(
+          "transition-transform duration-[180ms] ease-out motion-reduce:transition-none",
+          isPopping ? "scale-125" : "scale-100",
+        )}
+        height={24}
+        src={isActive ? "/icons/Like_True.svg" : "/icons/Like_False.svg"}
+        width={24}
+      />
     </button>
   );
 }

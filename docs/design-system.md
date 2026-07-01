@@ -474,6 +474,11 @@ MomentLit은 둥근 모서리를 적극적으로 사용한다.
 * 활성 아이콘 색상은 `#00ADB5`를 사용한다.
 * 위험 상태에는 `#DA294A`만 사용한다.
 
+## Interaction Cursor
+
+* 링크, 활성 버튼, 선택 가능한 컨트롤 등 클릭 가능한 요소는 `cursor-pointer`를 사용한다.
+* 비활성화된 버튼과 컨트롤은 `cursor-not-allowed`를 사용한다.
+
 ## Logo Rule
 
 * 로고 색상은 청록 계열을 유지한다.

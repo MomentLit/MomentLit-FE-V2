@@ -1,7 +1,6 @@
 export { default as AlertDropdown } from "./AlertDropdown";
 export { default as ArrowButton } from "./ArrowButton";
-export { default as BellIcon } from "./BellIcon";
-export { default as BrandIcon } from "./BrandIcon";
+export { default as BellIcon } from "./AlertIcon";
 export { default as BigCard } from "./BigCard";
 export { default as CalendarBox } from "./CalendarBox";
 export { default as DefaultProfile } from "./DefaultProfile";
