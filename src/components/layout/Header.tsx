@@ -31,7 +31,7 @@ export default function Header({ type = "top", className }: HeaderProps) {
   return (
     <header className={cn("w-full border-b border-[#D0D3DB]", type === "unauth" ? "bg-[#F8FBFB]" : "bg-[#FFFFFF]", className)}>
       <div className="flex h-[64px] w-full items-center justify-between px-[20px]">
-        <a className="flex h-[40px] w-[48px] items-center" aria-label="MomentLit 홈" href="/main">
+        <a className="flex h-[40px] w-[172px] items-center" aria-label="MomentLit 홈" href="/main">
           <Image alt="" aria-hidden height={27} src="/icons/icon.svg" width={42} />
         </a>
         {showNav && (
