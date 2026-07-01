@@ -14,7 +14,11 @@ type HeaderProps = {
   className?: string;
 };
 
-const navItems = ["홈", "공간 찾기", "AI 공간 매칭"];
+const navItems = [
+  { href: "/main", label: "홈" },
+  { href: "/search", label: "공간 찾기" },
+  { href: "#", label: "AI 공간 매칭" },
+];
 
 export default function Header({ type = "top", className }: HeaderProps) {
   const showNav = type !== "scroll" && type !== "noSearch";
@@ -24,29 +28,31 @@ export default function Header({ type = "top", className }: HeaderProps) {
   const showActions = type !== "unauth";
 
   return (
-    <header className={cn("w-full border-b border-[#D0D3DB] bg-[#FFFFFF]", className)}>
+    <header className={cn("w-full border-b border-[#D0D3DB]", type === "unauth" ? "bg-[#F8FBFB]" : "bg-[#FFFFFF]", className)}>
       <div className="mx-auto flex h-[64px] max-w-[1440px] items-center justify-between px-[20px]">
-        <BrandIcon className="size-[48px]" mode="transparentWhite" />
+        <a aria-label="MomentLit 홈" href="/main">
+          <BrandIcon className="h-[40px] w-[48px]" mode="transparentWhite" />
+        </a>
         {showNav && (
-          <nav className="flex h-[64px] items-center gap-[4px]" aria-label="주요 메뉴">
+          <nav className="hidden h-[64px] items-center gap-[4px] md:flex" aria-label="주요 메뉴">
             {navItems.map((item, index) => (
               <a
                 className={cn(
                   "flex h-[64px] items-center px-[16px] text-[18px] font-semibold",
-                  index === 0 ? "text-[#00ADB5]" : "text-[#67728A]",
+                  index === 0 && type !== "unauth" ? "text-[#00ADB5]" : "text-[#67728A]",
                 )}
-                href={index === 0 ? "/main" : "#"}
-                key={item}
+                href={item.href}
+                key={item.label}
               >
-                {item}
+                {item.label}
               </a>
             ))}
           </nav>
         )}
         {showAuth ? (
-          <div className="flex items-center gap-[12px]">
-            <Button className="h-[40px] w-[80px] px-[16px] py-[12px] text-[13px]">로그인</Button>
-            <Button className="h-[40px] w-[80px] px-[16px] py-[12px] text-[13px]" variant="outline">
+          <div className="flex items-center gap-[8px] sm:gap-[12px]">
+            <Button className="h-[40px] w-[72px] px-[10px] py-[12px] text-[11px] sm:w-[80px] sm:px-[16px]" href="/login">로그인</Button>
+            <Button className="h-[40px] w-[72px] px-[10px] py-[12px] text-[11px] sm:w-[80px] sm:px-[16px]" href="/signup" variant="outline">
               회원가입
             </Button>
           </div>

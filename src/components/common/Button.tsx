@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 import { cn } from "@/utils/cn";
@@ -9,10 +10,11 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   pressed?: boolean;
   fullWidth?: boolean;
+  href?: string;
 };
 
 const baseClass =
-  "inline-flex h-[53px] items-center justify-center rounded-[12px] px-[20px] py-[16px] text-center text-[16px] font-bold leading-[1.3] transition-colors disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center whitespace-nowrap rounded-[12px] px-[20px] py-[16px] text-center text-[16px] font-bold leading-[1.3] transition-colors disabled:cursor-not-allowed";
 
 const variantClass: Record<ButtonVariant, string> = {
   primary:
@@ -28,20 +30,32 @@ export default function Button({
   variant = "primary",
   pressed = false,
   fullWidth = false,
+  href,
   className,
   ...props
 }: ButtonProps) {
+  const buttonClassName = cn(
+    baseClass,
+    variantClass[variant],
+    pressed && variant === "primary" && "bg-[#003F42] text-white/70",
+    pressed && variant === "secondary" && "bg-[#99A1B1] text-[#67728A]",
+    pressed && variant === "outline" && "border-[#003F42] bg-[#EEEEEE]/70 text-[#003F42]",
+    className?.includes("h-") ? undefined : "h-[53px]",
+    fullWidth ? "w-full" : className?.includes("w-") ? undefined : "w-[400px]",
+    className,
+  );
+
+  if (href) {
+    return (
+      <Link className={buttonClassName} href={href}>
+        {children}
+      </Link>
+    );
+  }
+
   return (
     <button
-      className={cn(
-        baseClass,
-        variantClass[variant],
-        pressed && variant === "primary" && "bg-[#003F42] text-white/70",
-        pressed && variant === "secondary" && "bg-[#99A1B1] text-[#67728A]",
-        pressed && variant === "outline" && "border-[#003F42] bg-[#EEEEEE]/70 text-[#003F42]",
-        fullWidth ? "w-full" : "w-[400px]",
-        className,
-      )}
+      className={buttonClassName}
       type="button"
       {...props}
     >
