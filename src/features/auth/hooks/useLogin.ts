@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -20,8 +21,15 @@ export function useLogin() {
       const response = await signIn(body);
       setAuthTokens(response.data.access_token, response.data.refresh_token);
       router.push("/main");
-    } catch {
-      setError("이메일 또는 비밀번호를 확인해주세요.");
+    } catch (requestError) {
+      const status = axios.isAxiosError(requestError)
+        ? requestError.response?.status
+        : undefined;
+      setError(
+        status === 401
+          ? "이메일 또는 비밀번호를 확인해주세요."
+          : "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      );
     } finally {
       setIsLoading(false);
     }

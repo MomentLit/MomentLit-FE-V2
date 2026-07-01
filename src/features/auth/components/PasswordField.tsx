@@ -31,6 +31,7 @@ export default function PasswordField({
       endAdornment={
         <button
           aria-label={visible ? "비밀번호 숨기기" : "비밀번호 보기"}
+          aria-pressed={visible}
           className="grid size-[28px] place-items-center"
           onClick={() => setVisible((current) => !current)}
           type="button"

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { cn } from "@/utils/cn";
 
@@ -30,11 +31,17 @@ export default function Footer({ variant = "landing", className }: FooterProps) 
           </div>
         </div>
         <nav className="grid grid-cols-2 gap-x-[32px] gap-y-[20px] text-[18px] font-semibold text-[#67728A] md:flex md:flex-col md:gap-[28px] md:text-[24px]" aria-label="푸터 메뉴">
-          {navItems.map((item, index) => (
-            <a href={navHrefs[index]} key={item}>
-              {item}
-            </a>
-          ))}
+          {navItems.map((item, index) =>
+            navHrefs[index].startsWith("/") ? (
+              <Link href={navHrefs[index]} key={item}>
+                {item}
+              </Link>
+            ) : (
+              <a href={navHrefs[index]} key={item}>
+                {item}
+              </a>
+            ),
+          )}
         </nav>
       </div>
     </footer>

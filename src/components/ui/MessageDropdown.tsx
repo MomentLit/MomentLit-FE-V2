@@ -45,7 +45,7 @@ export default function MessageDropdown({ items = defaultItems, className }: Mes
           </div>
         </article>
       ))}
-      <Button className="h-[42px] w-full rounded-[12px] bg-[#222831] text-[14px] hover:bg-[#222831]" fullWidth>
+      <Button className="h-[42px] w-full rounded-[12px] bg-[#222831] text-[14px] hover:bg-[#222831]" fullWidth size="custom">
         전체 메시지 보기
       </Button>
     </section>

@@ -107,6 +107,7 @@ export default function SignupForm() {
         className="h-[57px] rounded-[12px] px-[22px] py-[17px] text-[17px]"
         disabled={isLoading}
         fullWidth
+        size="custom"
         type="submit"
       >
         {isLoading ? "가입 중" : "회원가입"}

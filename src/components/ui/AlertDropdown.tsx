@@ -40,7 +40,7 @@ export default function AlertDropdown({ items = defaultItems, className }: Alert
           <p className="w-[280px] text-[13px] font-medium leading-[1.35] text-[#67728A]">{item.content}</p>
         </article>
       ))}
-      <Button className="h-[42px] w-full rounded-[12px] bg-[#222831] text-[14px] hover:bg-[#222831]" fullWidth>
+      <Button className="h-[42px] w-full rounded-[12px] bg-[#222831] text-[14px] hover:bg-[#222831]" fullWidth size="custom">
         전체 알림 보기
       </Button>
     </section>

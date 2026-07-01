@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -18,8 +19,13 @@ export function useSignup() {
     try {
       await signUp(body);
       router.push("/login");
-    } catch {
-      setError("회원가입에 실패했습니다. 입력 정보를 확인해주세요.");
+    } catch (requestError) {
+      const serverMessage = axios.isAxiosError<{ message?: string }>(requestError)
+        ? requestError.response?.data?.message
+        : undefined;
+      setError(
+        serverMessage ?? "회원가입에 실패했습니다. 입력 정보를 확인해주세요.",
+      );
     } finally {
       setIsLoading(false);
     }

@@ -76,6 +76,7 @@ export default function LoginForm() {
           className="h-[57px] rounded-[12px] px-[22px] py-[17px] text-[17px]"
           disabled={isLoading}
           fullWidth
+          size="custom"
           type="submit"
         >
           {isLoading ? "로그인 중" : "로그인"}
@@ -84,6 +85,7 @@ export default function LoginForm() {
           className="h-[57px] gap-[9px] rounded-[13px] border border-[#D0D3DB] px-[22px] py-[17px] text-[17px] font-semibold text-[#222831]"
           fullWidth
           onClick={() => void oauthGoogle()}
+          size="custom"
           variant="secondary"
         >
           <Image alt="" aria-hidden height={26} src="/icons/google.svg" width={26} />

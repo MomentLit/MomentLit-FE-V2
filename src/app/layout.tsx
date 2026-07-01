@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import type { ReactNode } from "react";
 
 import "./globals.css";
+
+const pretendard = localFont({
+  src: "./fonts/PretendardVariable.woff2",
+  variable: "--font-pretendard",
+  display: "swap",
+  weight: "45 920",
+});
 
 export const metadata: Metadata = {
   title: "MomentLit",
@@ -11,7 +19,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body className={pretendard.variable}>{children}</body>
     </html>
   );
 }

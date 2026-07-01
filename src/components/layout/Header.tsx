@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import Button from "@/components/common/Button";
 import FilterChip from "@/components/common/FilterChip";
@@ -31,29 +32,33 @@ export default function Header({ type = "top", className }: HeaderProps) {
   return (
     <header className={cn("w-full border-b border-[#D0D3DB]", type === "unauth" ? "bg-[#F8FBFB]" : "bg-[#FFFFFF]", className)}>
       <div className="flex h-[64px] w-full items-center justify-between px-[20px]">
-        <a className="flex h-[40px] w-[172px] items-center" aria-label="MomentLit 홈" href="/main">
+        <Link className="flex h-[40px] w-[172px] items-center" aria-label="MomentLit 홈" href="/main">
           <Image alt="" aria-hidden height={27} src="/icons/icon.svg" width={42} />
-        </a>
+        </Link>
         {showNav && (
           <nav className="hidden h-[64px] items-center gap-[4px] md:flex" aria-label="주요 메뉴">
-            {navItems.map((item, index) => (
-              <a
-                className={cn(
-                  "flex h-[64px] items-center px-[16px] text-[18px] font-semibold",
-                  index === 0 && type !== "unauth" ? "text-[#00ADB5]" : "text-[#67728A]",
-                )}
-                href={item.href}
-                key={item.label}
-              >
-                {item.label}
-              </a>
-            ))}
+            {navItems.map((item, index) => {
+              const linkClassName = cn(
+                "flex h-[64px] items-center px-[16px] text-[18px] font-semibold",
+                index === 0 && type !== "unauth" ? "text-[#00ADB5]" : "text-[#67728A]",
+              );
+
+              return item.href.startsWith("/") ? (
+                <Link className={linkClassName} href={item.href} key={item.label}>
+                  {item.label}
+                </Link>
+              ) : (
+                <a className={linkClassName} href={item.href} key={item.label}>
+                  {item.label}
+                </a>
+              );
+            })}
           </nav>
         )}
         {showAuth ? (
           <div className="flex items-center gap-[8px] sm:gap-[12px]">
-            <Button className="h-[40px] w-[72px] px-[10px] py-[12px] text-[11px] sm:w-[80px] sm:px-[16px]" href="/login">로그인</Button>
-            <Button className="h-[40px] w-[72px] px-[10px] py-[12px] text-[11px] sm:w-[80px] sm:px-[16px]" href="/signup" variant="outline">
+            <Button className="h-[40px] w-[72px] px-[10px] py-[12px] text-[11px] sm:w-[80px] sm:px-[16px]" href="/login" size="custom">로그인</Button>
+            <Button className="h-[40px] w-[72px] px-[10px] py-[12px] text-[11px] sm:w-[80px] sm:px-[16px]" href="/signup" size="custom" variant="outline">
               회원가입
             </Button>
           </div>
