@@ -1,5 +1,5 @@
-import Button from "@/src/components/common/Button";
-import { cn } from "@/src/utils/cn";
+import Button from "@/components/common/Button";
+import { cn } from "@/utils/cn";
 
 type AlertItem = {
   title: string;

@@ -66,10 +66,13 @@ src
 ```text
 src/apis
 ├── client.ts
-├── auth.api.ts
-├── user.api.ts
-├── space.api.ts
-└── reservation.api.ts
+├── index.ts
+└── {domain}
+    ├── get.ts
+    ├── post.ts
+    ├── patch.ts
+    ├── delete.ts
+    └── index.ts
 ```
 
 ### 역할
@@ -83,9 +86,9 @@ src/apis
 ### 예시
 
 ```ts
-// src/apis/space.api.ts
+// src/apis/space/get.ts
 
-import { apiClient } from "./client";
+import { apiClient } from "@/apis/client";
 
 export const getSpaces = async () => {
   const response = await apiClient.get("/spaces");
@@ -98,6 +101,10 @@ export const getSpaces = async () => {
 * 컴포넌트 안에서 직접 `axios.get()`을 호출하지 않는다.
 * 모든 API 요청은 `apis` 폴더의 함수로 분리한다.
 * API 함수명은 동사 기반으로 작성한다.
+* API는 도메인 디렉터리 아래에서 HTTP method 파일로 분리한다.
+* 존재하지 않는 HTTP method 파일은 만들지 않는다.
+* 도메인 `index.ts`에서 공개 API를 재export한다.
+* 루트 `src/apis/index.ts`는 도메인 API를 namespace로 집계한다.
 
 ```ts
 getSpaces()
@@ -410,34 +417,39 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 ```text
 src/types
-├── api.type.ts
-├── user.type.ts
-├── common.type.ts
-└── route.type.ts
+├── common
+│   ├── request
+│   ├── response
+│   └── index.ts
+└── {domain}
+    ├── request
+    ├── response
+    └── index.ts
 ```
 
 ### 역할
 
-* 공통 응답 타입 정의
-* 공통 엔티티 타입 정의
-* 여러 기능에서 사용하는 타입 관리
+* API 요청 및 응답 타입 정의
+* 도메인 간 공통 스키마 정의
+* 도메인별 타입의 barrel export 관리
 
 ### 예시
 
 ```ts
-// src/types/api.type.ts
+// src/types/common/response/apiResponse.ts
 
 export type ApiResponse<T> = {
-  success: boolean;
-  data: T;
   message: string;
+  data: T;
 };
 ```
 
 ### 규칙
 
-* 특정 기능에서만 쓰는 타입은 `features/{domain}/types.ts`에 둔다.
-* 여러 곳에서 재사용되는 타입만 `types`에 둔다.
+* API 계약 타입은 `types/{domain}/request`, `types/{domain}/response`에 둔다.
+* `types/common`은 여러 도메인에서 재사용하는 타입만 관리하며 공통 함수는 두지 않는다.
+* 각 도메인의 `index.ts`에서 외부에 공개할 타입을 재export한다.
+* enum 및 union 타입은 해당 도메인 파일에 두고 도메인 `index.ts`에서 재export한다.
 * 타입명은 명확하게 작성한다.
 
 ---
@@ -499,7 +511,11 @@ export function formatPrice(price: number) {
 예를 들어 공간 목록 기능을 만든다면 다음과 같이 작성한다.
 
 ```text
-src/apis/space.api.ts
+src/apis/space/get.ts
+src/apis/space/index.ts
+src/types/space/request/spaceListSearchParams.ts
+src/types/space/response/spaceListSearchResponse.ts
+src/types/space/index.ts
 src/features/space/components/SpaceList.tsx
 src/features/space/components/SpaceCard.tsx
 src/features/space/hooks/useSpaces.ts
@@ -516,9 +532,13 @@ src/app/Router.tsx
 
 ```ts
 import Button from "@/components/common/Button";
-import { getSpaces } from "@/apis/space.api";
+import { getSpaces } from "@/apis/space";
+import type { SpaceListSearchResponse } from "@/types/space";
 import { useAuthStore } from "@/stores/auth.store";
 ```
+
+`@/*` alias는 `src/*`를 가리킨다. 같은 디렉터리 내부의 짧은 상대경로를 제외하고,
+도메인 간 import는 절대경로 alias를 사용한다.
 
 상대 경로가 너무 깊어지는 import는 피한다.
 
@@ -541,9 +561,9 @@ import Button from "@/components/common/Button";
 | 페이지   | PascalCase + Page          | `HomePage.tsx`  |
 | 컴포넌트  | PascalCase                 | `SpaceCard.tsx` |
 | 훅     | camelCase, use 접두사         | `useModal.ts`   |
-| API   | domain.api.ts              | `space.api.ts`  |
+| API 디렉터리 | domain + HTTP method | `space/get.ts` |
+| 타입 디렉터리 | domain/request 또는 response | `space/request/spaceCreateRequest.ts` |
 | Store | domain.store.ts            | `auth.store.ts` |
-| 타입    | domain.type.ts 또는 types.ts | `user.type.ts`  |
 | 유틸    | camelCase                  | `formatDate.ts` |
 
 ---
@@ -600,7 +620,13 @@ API 연동 시 다음 구조를 따른다.
 ```text
 apis
 ├── client.ts
-└── {domain}.api.ts
+├── index.ts
+└── {domain}
+    ├── get.ts
+    ├── post.ts
+    ├── patch.ts
+    ├── delete.ts
+    └── index.ts
 ```
 
 ### `client.ts`
@@ -608,19 +634,29 @@ apis
 ```ts
 import axios from "axios";
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 10000,
+  baseURL: BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 ```
 
 ### 도메인 API 파일
 
 ```ts
-import { apiClient } from "./client";
+import { apiClient } from "@/apis/client";
+import type { ApiResponse } from "@/types/common";
+import type { SpaceListSearchResponse } from "@/types/space";
 
-export const getSpaces = async () => {
-  const response = await apiClient.get("/spaces");
+export const getSpaces = async (): Promise<
+  ApiResponse<{ spaces: SpaceListSearchResponse[] }>
+> => {
+  const response = await apiClient.get<
+    ApiResponse<{ spaces: SpaceListSearchResponse[] }>
+  >("/spaces");
   return response.data;
 };
 ```
@@ -631,6 +667,7 @@ export const getSpaces = async () => {
 * `baseURL`은 환경 변수로 관리한다.
 * API 응답 타입은 가능한 한 명시한다.
 * 인증 토큰이 필요한 경우 interceptor에서 처리한다.
+* 사용처는 `@/apis/{domain}`에서 함수를 import하거나 namespace import를 사용한다.
 
 ---
 
