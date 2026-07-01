@@ -1,9 +1,10 @@
+import Image from "next/image";
+
 import Button from "@/components/common/Button";
 import FilterChip from "@/components/common/FilterChip";
 import { cn } from "@/utils/cn";
 
 import BellIcon from "../ui/BellIcon";
-import BrandIcon from "../ui/BrandIcon";
 import DefaultProfile from "../ui/DefaultProfile";
 import MessageIcon from "../ui/MessageIcon";
 
@@ -30,8 +31,8 @@ export default function Header({ type = "top", className }: HeaderProps) {
   return (
     <header className={cn("w-full border-b border-[#D0D3DB]", type === "unauth" ? "bg-[#F8FBFB]" : "bg-[#FFFFFF]", className)}>
       <div className="mx-auto flex h-[64px] max-w-[1440px] items-center justify-between px-[20px]">
-        <a aria-label="MomentLit 홈" href="/main">
-          <BrandIcon className="h-[40px] w-[48px]" mode="transparentWhite" />
+        <a className="flex h-[40px] w-[48px] items-center" aria-label="MomentLit 홈" href="/main">
+          <Image alt="" aria-hidden height={27} src="/icons/icon.svg" width={42} />
         </a>
         {showNav && (
           <nav className="hidden h-[64px] items-center gap-[4px] md:flex" aria-label="주요 메뉴">
