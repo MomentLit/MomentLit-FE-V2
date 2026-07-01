@@ -30,7 +30,7 @@ export default function Header({ type = "top", className }: HeaderProps) {
 
   return (
     <header className={cn("w-full border-b border-[#D0D3DB]", type === "unauth" ? "bg-[#F8FBFB]" : "bg-[#FFFFFF]", className)}>
-      <div className="mx-auto flex h-[64px] max-w-[1440px] items-center justify-between px-[20px]">
+      <div className="flex h-[64px] w-full items-center justify-between px-[20px]">
         <a className="flex h-[40px] w-[48px] items-center" aria-label="MomentLit 홈" href="/main">
           <Image alt="" aria-hidden height={27} src="/icons/icon.svg" width={42} />
         </a>
@@ -68,7 +68,7 @@ export default function Header({ type = "top", className }: HeaderProps) {
         )}
       </div>
       {showSearch && (
-        <div className="mx-auto flex max-w-[1440px] items-center justify-center gap-[24px] px-[20px] py-[5px]">
+        <div className="flex w-full items-center justify-center gap-[24px] px-[20px] py-[5px]">
           {showFilters && (
             <div className="flex gap-[8px]">
               {["지역", "유형", "수용 인원", "가격"].map((label) => (
