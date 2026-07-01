@@ -1,18 +1,36 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import Link from "next/link";
+import type {
+  AnchorHTMLAttributes,
+  ButtonHTMLAttributes,
+  ReactNode,
+} from "react";
 
 import { cn } from "@/utils/cn";
 
 type ButtonVariant = "primary" | "secondary" | "outline";
+type ButtonSize = "default" | "custom";
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+type SharedButtonProps = {
   children?: ReactNode;
   variant?: ButtonVariant;
   pressed?: boolean;
   fullWidth?: boolean;
+  size?: ButtonSize;
+  className?: string;
 };
 
+type NativeButtonProps = SharedButtonProps &
+  ButtonHTMLAttributes<HTMLButtonElement>;
+
+type LinkButtonProps = SharedButtonProps &
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "children" | "className" | "href"> & {
+    href: string;
+  };
+
+type ButtonProps = NativeButtonProps | LinkButtonProps;
+
 const baseClass =
-  "inline-flex h-[53px] items-center justify-center rounded-[12px] px-[20px] py-[16px] text-center text-[16px] font-bold leading-[1.3] transition-colors disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center whitespace-nowrap rounded-[12px] px-[20px] py-[16px] text-center text-[16px] font-bold leading-[1.3] transition-colors disabled:cursor-not-allowed";
 
 const variantClass: Record<ButtonVariant, string> = {
   primary:
@@ -23,27 +41,64 @@ const variantClass: Record<ButtonVariant, string> = {
     "border-[2.5px] border-[#00ADB5] bg-[#FFFFFF] text-[#00ADB5] hover:border-[#007E84] hover:bg-[#EEEEEE]/90 hover:text-[#007E84] active:border-[#003F42] active:bg-[#EEEEEE]/70 active:text-[#003F42] disabled:border-[#D0D3DB] disabled:text-[#67728A]",
 };
 
-export default function Button({
-  children = "버튼",
+function getButtonClassName({
   variant = "primary",
   pressed = false,
   fullWidth = false,
+  size = "default",
   className,
-  ...props
-}: ButtonProps) {
+}: SharedButtonProps) {
+  return cn(
+    baseClass,
+    variantClass[variant],
+    pressed && variant === "primary" && "bg-[#003F42] text-white/70",
+    pressed && variant === "secondary" && "bg-[#99A1B1] text-[#67728A]",
+    pressed && variant === "outline" && "border-[#003F42] bg-[#EEEEEE]/70 text-[#003F42]",
+    size === "default" && "h-[53px]",
+    fullWidth ? "w-full" : size === "default" && "w-[400px]",
+    className,
+  );
+}
+
+export default function Button(props: ButtonProps) {
+  if ("href" in props) {
+    const {
+      children = "버튼",
+      variant,
+      pressed,
+      fullWidth,
+      size,
+      className,
+      href,
+      ...linkProps
+    } = props;
+
+    return (
+      <Link
+        {...linkProps}
+        className={getButtonClassName({ variant, pressed, fullWidth, size, className })}
+        href={href}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  const {
+    children = "버튼",
+    variant,
+    pressed,
+    fullWidth,
+    size,
+    className,
+    ...buttonProps
+  } = props;
+
   return (
     <button
-      className={cn(
-        baseClass,
-        variantClass[variant],
-        pressed && variant === "primary" && "bg-[#003F42] text-white/70",
-        pressed && variant === "secondary" && "bg-[#99A1B1] text-[#67728A]",
-        pressed && variant === "outline" && "border-[#003F42] bg-[#EEEEEE]/70 text-[#003F42]",
-        fullWidth ? "w-full" : "w-[400px]",
-        className,
-      )}
-      type="button"
-      {...props}
+      {...buttonProps}
+      className={getButtonClassName({ variant, pressed, fullWidth, size, className })}
+      type={buttonProps.type ?? "button"}
     >
       {children}
     </button>

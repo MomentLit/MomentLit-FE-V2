@@ -1,9 +1,11 @@
+import Image from "next/image";
+import Link from "next/link";
+
 import Button from "@/components/common/Button";
 import FilterChip from "@/components/common/FilterChip";
 import { cn } from "@/utils/cn";
 
 import BellIcon from "../ui/BellIcon";
-import BrandIcon from "../ui/BrandIcon";
 import DefaultProfile from "../ui/DefaultProfile";
 import MessageIcon from "../ui/MessageIcon";
 
@@ -14,7 +16,11 @@ type HeaderProps = {
   className?: string;
 };
 
-const navItems = ["홈", "공간 찾기", "AI 공간 매칭"];
+const navItems = [
+  { href: "/main", label: "홈" },
+  { href: "/search", label: "공간 찾기" },
+  { href: "#", label: "AI 공간 매칭" },
+];
 
 export default function Header({ type = "top", className }: HeaderProps) {
   const showNav = type !== "scroll" && type !== "noSearch";
@@ -24,29 +30,35 @@ export default function Header({ type = "top", className }: HeaderProps) {
   const showActions = type !== "unauth";
 
   return (
-    <header className={cn("w-full border-b border-[#D0D3DB] bg-[#FFFFFF]", className)}>
-      <div className="mx-auto flex h-[64px] max-w-[1440px] items-center justify-between px-[20px]">
-        <BrandIcon className="size-[48px]" mode="transparentWhite" />
+    <header className={cn("w-full border-b border-[#D0D3DB]", type === "unauth" ? "bg-[#F8FBFB]" : "bg-[#FFFFFF]", className)}>
+      <div className="flex h-[64px] w-full items-center justify-between px-[20px]">
+        <Link className="flex h-[40px] w-[172px] items-center" aria-label="MomentLit 홈" href="/main">
+          <Image alt="" aria-hidden height={27} src="/icons/icon.svg" width={42} />
+        </Link>
         {showNav && (
-          <nav className="flex h-[64px] items-center gap-[4px]" aria-label="주요 메뉴">
-            {navItems.map((item, index) => (
-              <a
-                className={cn(
-                  "flex h-[64px] items-center px-[16px] text-[18px] font-semibold",
-                  index === 0 ? "text-[#00ADB5]" : "text-[#67728A]",
-                )}
-                href={index === 0 ? "/main" : "#"}
-                key={item}
-              >
-                {item}
-              </a>
-            ))}
+          <nav className="hidden h-[64px] items-center gap-[4px] md:flex" aria-label="주요 메뉴">
+            {navItems.map((item, index) => {
+              const linkClassName = cn(
+                "flex h-[64px] items-center px-[16px] text-[18px] font-semibold",
+                index === 0 && type !== "unauth" ? "text-[#00ADB5]" : "text-[#67728A]",
+              );
+
+              return item.href.startsWith("/") ? (
+                <Link className={linkClassName} href={item.href} key={item.label}>
+                  {item.label}
+                </Link>
+              ) : (
+                <a className={linkClassName} href={item.href} key={item.label}>
+                  {item.label}
+                </a>
+              );
+            })}
           </nav>
         )}
         {showAuth ? (
-          <div className="flex items-center gap-[12px]">
-            <Button className="h-[40px] w-[80px] px-[16px] py-[12px] text-[13px]">로그인</Button>
-            <Button className="h-[40px] w-[80px] px-[16px] py-[12px] text-[13px]" variant="outline">
+          <div className="flex items-center gap-[8px] sm:gap-[12px]">
+            <Button className="h-[40px] w-[72px] px-[10px] py-[12px] text-[11px] sm:w-[80px] sm:px-[16px]" href="/login" size="custom">로그인</Button>
+            <Button className="h-[40px] w-[72px] px-[10px] py-[12px] text-[11px] sm:w-[80px] sm:px-[16px]" href="/signup" size="custom" variant="outline">
               회원가입
             </Button>
           </div>
@@ -61,7 +73,7 @@ export default function Header({ type = "top", className }: HeaderProps) {
         )}
       </div>
       {showSearch && (
-        <div className="mx-auto flex max-w-[1440px] items-center justify-center gap-[24px] px-[20px] py-[5px]">
+        <div className="flex w-full items-center justify-center gap-[24px] px-[20px] py-[5px]">
           {showFilters && (
             <div className="flex gap-[8px]">
               {["지역", "유형", "수용 인원", "가격"].map((label) => (
