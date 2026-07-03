@@ -2,17 +2,19 @@ import { apiClient } from "@/apis/client";
 import type { OAuthGoogleCallbackResponse } from "@/types/auth";
 import type { ApiResponse } from "@/types/common";
 
+export const OAUTH_STATE_KEY = "momentlit_google_oauth_state";
+
 export const oauthGoogle = async (state?: string): Promise<void> => {
   if (typeof window === "undefined") {
     throw new Error("oauthGoogle is only available in the browser");
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!baseUrl) {
-    throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
-  }
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
 
-  const params = new URLSearchParams(state ? { state } : undefined);
+  const oauthState = state ?? crypto.randomUUID();
+  sessionStorage.setItem(OAUTH_STATE_KEY, oauthState);
+
+  const params = new URLSearchParams({ state: oauthState });
   const query = params.toString();
   window.location.href = `${baseUrl}/auth/oauth/google${query ? `?${query}` : ""}`;
 };

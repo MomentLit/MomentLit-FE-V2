@@ -19,8 +19,8 @@ export function useMyPageMenu() {
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
-  const loadProfile = useCallback(async () => {
-    if (profile || isRequestingRef.current) return;
+  const loadProfile = useCallback(async (force = false) => {
+    if ((!force && profile) || isRequestingRef.current) return;
 
     isRequestingRef.current = true;
     setIsProfileLoading(true);

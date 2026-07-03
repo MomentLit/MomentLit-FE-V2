@@ -33,7 +33,7 @@ export default function CalendarBox({
           </button>
         </div>
       </div>
-      <div className="grid grid-cols-7 gap-[9px]">
+      <div className="grid grid-cols-7 gap-y-[9px]">
         {weekdays.map((weekday) => (
           <div className="grid h-[18px] place-items-center text-[10px] font-bold text-[#7C8799]" key={weekday}>
             {weekday}
@@ -46,7 +46,7 @@ export default function CalendarBox({
           return (
             <button
               className={cn(
-                "grid h-[40px] w-[41px] place-items-center rounded-[13px] text-[13px] font-semibold",
+                "grid h-[40px] w-full max-w-[41px] place-items-center justify-self-center rounded-[13px] text-[13px] font-semibold",
                 selected && "bg-[#E8F6F7] font-bold text-[#008992]",
                 muted && !selected && "bg-[#F3F7F7] text-[#8A94A6]",
                 !selected && !muted && "bg-white text-[#222831]",
@@ -59,7 +59,7 @@ export default function CalendarBox({
           );
         })}
         {Array.from({ length: 4 }, (_, index) => (
-          <span className="h-[40px] w-[41px]" key={`empty-${index}`} />
+          <span className="h-[40px] w-full max-w-[41px] justify-self-center" key={`empty-${index}`} />
         ))}
       </div>
     </section>

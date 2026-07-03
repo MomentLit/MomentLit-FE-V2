@@ -634,7 +634,7 @@ apis
 ```ts
 import axios from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -643,6 +643,10 @@ export const apiClient = axios.create({
   },
 });
 ```
+
+브라우저에서는 `NEXT_PUBLIC_API_BASE_URL=/api`를 사용하고, Next.js rewrite가
+`API_BASE_URL`에 설정된 백엔드 주소로 요청을 프록시한다. 이를 통해 로컬 개발과
+배포 환경에서 동일 출처 정책을 유지한다.
 
 ### 도메인 API 파일
 

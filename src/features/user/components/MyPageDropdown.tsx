@@ -57,7 +57,7 @@ export default function MyPageDropdown({
 
       {menuItems.map((item) => (
         <Link
-          className="flex h-[44px] shrink-0 items-center rounded-[12px] bg-[#F7F7F7] px-[20px] text-[13px] font-semibold text-[#5E687E] transition-colors hover:bg-[#EEEEEE] hover:text-[#00ADB5]"
+          className="flex h-[44px] shrink-0 items-center rounded-[12px] bg-[#F7F7F7] px-[20px] text-[16px] font-semibold text-[#5E687E] transition-colors hover:bg-[#EEEEEE] hover:text-[#00ADB5]"
           href={item.href}
           key={item.label}
         >
@@ -66,7 +66,7 @@ export default function MyPageDropdown({
       ))}
 
       <button
-        className="flex h-[44px] shrink-0 items-center rounded-[12px] bg-[#F7F7F7] px-[20px] text-[13px] font-semibold text-[#4F5D73] transition-colors hover:bg-[#EEEEEE] hover:text-[#DA294A] disabled:opacity-60"
+        className="flex h-[44px] shrink-0 items-center rounded-[12px] bg-[#F7F7F7] px-[20px] text-[16px] font-semibold text-[#4F5D73] transition-colors hover:bg-[#EEEEEE] hover:text-[#DA294A] disabled:opacity-60"
         disabled={isSigningOut}
         onClick={onSignOut}
         type="button"

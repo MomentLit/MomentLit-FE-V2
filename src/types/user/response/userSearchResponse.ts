@@ -3,4 +3,7 @@ export type UserSearchResponse = {
   email: string;
   name: string;
   created_at: string;
+  phone?: string | null;
+  intro?: string | null;
+  role?: string;
 };

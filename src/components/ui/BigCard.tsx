@@ -30,7 +30,7 @@ export default function BigCard({
   return (
     <article
       className={cn(
-        "group relative flex shrink-0 flex-col justify-end overflow-hidden rounded-[12px] bg-white bg-cover bg-center outline-none",
+        "group relative flex shrink-0 flex-col justify-end overflow-hidden rounded-[12px] bg-[#99A1B1] bg-cover bg-center outline-none",
         sizeClasses[size],
         className,
       )}
