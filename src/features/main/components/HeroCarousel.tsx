@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import ArrowButton from "@/components/ui/ArrowButton";
 import BigCard from "@/components/ui/BigCard";
-import type { MainHero } from "@/features/main/data/mainPageData";
+import type { MainHero } from "@/features/main/types";
 import { cn } from "@/utils/cn";
 
 type HeroCarouselProps = {

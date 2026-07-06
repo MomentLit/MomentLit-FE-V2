@@ -2,6 +2,16 @@
 
 Version 1.0
 
+## Header Filter Chip
+
+Header 검색 필터는 `FilterChip` `compact` 변형을 사용한다.
+
+* 높이: `36px`
+* 좌우 여백: `14px`
+* 배경: `#EDEDED`
+* 텍스트: `12px`, `#5E687E`
+* radius: `12px`
+
 이 문서는 MomentLit 프로젝트의 모든 웹 UI에서 공통으로 지켜야 하는 디자인 기준이다.
 
 새로운 페이지나 레이아웃을 만들 때는 이 문서를 기준으로 작업한다.

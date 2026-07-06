@@ -23,12 +23,19 @@ type HeaderType = "top" | "topSearch" | "landing" | "unauth" | "scroll" | "noSea
 
 type HeaderProps = {
   type?: HeaderType;
+  activeNav?: "home" | "spaces" | null;
   alerts?: AlertItem[];
   alertError?: string | null;
   alertsLoading?: boolean;
   messages?: MessageItem[];
   messageError?: string | null;
   messagesLoading?: boolean;
+  searchValue?: string;
+  categoryValue?: string;
+  categoryOptions?: string[];
+  onSearchValueChange?: (value: string) => void;
+  onCategoryChange?: (value: string) => void;
+  onSearch?: () => void;
   className?: string;
 };
 
@@ -57,12 +64,19 @@ const getServerAuthSnapshot = () => false;
 
 export default function Header({
   type = "top",
+  activeNav,
   alerts = [],
   alertError,
   alertsLoading = false,
   messages = [],
   messageError,
   messagesLoading = false,
+  searchValue,
+  categoryValue = "",
+  categoryOptions = [],
+  onSearchValueChange,
+  onCategoryChange,
+  onSearch,
   className,
 }: HeaderProps) {
   const [activeDropdown, setActiveDropdown] = useState<"alert" | "message" | "profile" | null>(null);
@@ -85,6 +99,15 @@ export default function Header({
   const showFilters = type === "topSearch";
   const showAuth = type === "unauth" || !isAuthenticated;
   const showActions = type !== "unauth" && isAuthenticated;
+  const activeNavIndex = activeNav === null
+    ? -1
+    : activeNav === "spaces"
+      ? 1
+      : activeNav === "home"
+        ? 0
+        : type === "topSearch"
+          ? 1
+          : 0;
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -113,7 +136,9 @@ export default function Header({
             {navItems.map((item, index) => {
               const linkClassName = cn(
                 "flex h-[64px] items-center px-[16px] text-[18px] font-semibold",
-                index === 0 && type !== "unauth" ? "text-[#00ADB5]" : "text-[#67728A]",
+                index === activeNavIndex && type !== "unauth"
+                  ? "text-[#00ADB5]"
+                  : "text-[#67728A]",
               );
 
               return item.href.startsWith("/") ? (
@@ -206,28 +231,52 @@ export default function Header({
         )}
       </div>
       {showSearch && (
-        <div className="flex h-[64px] w-full items-center justify-center gap-[24px] px-[20px]">
+        <div
+          className={cn(
+            "flex h-[64px] w-full items-center gap-[24px] px-[20px]",
+            showFilters ? "justify-between" : "justify-center",
+          )}
+        >
           {showFilters && (
-            <div className="flex gap-[8px]">
-              {["지역", "유형", "수용 인원", "가격"].map((label) => (
-                <FilterChip className="min-h-[34px] px-[14px] py-[9px] text-[14px]" chipType="select" key={label}>
-                  {label}
-                </FilterChip>
-              ))}
+            <div className="hidden gap-[8px] lg:flex">
+              <FilterChip chipType="select" compact disabled>지역</FilterChip>
+              <label className="relative flex min-h-[36px] items-center gap-[2px] rounded-[12px] bg-[#EDEDED] px-[14px] py-[9px] text-[12px] font-semibold leading-none text-[#5E687E]">
+                <span className="sr-only">유형</span>
+                <select
+                  aria-label="유형"
+                  className="cursor-pointer appearance-none bg-transparent pr-[13px] outline-none"
+                  onChange={(event) => onCategoryChange?.(event.target.value)}
+                  value={categoryValue}
+                >
+                  <option value="">유형</option>
+                  {categoryOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+                </select>
+                <span className="pointer-events-none absolute right-[14px] rotate-90 text-[11px] leading-none">›</span>
+              </label>
+              <FilterChip chipType="select" compact disabled>수용 인원</FilterChip>
+              <FilterChip chipType="select" compact disabled>가격</FilterChip>
             </div>
           )}
-          <div className={cn("flex max-w-full items-center gap-[14px] rounded-full border border-[#D0D3DB] bg-white py-[5px] pl-[18px] pr-[5px]", showFilters ? "w-[439px]" : "w-[650px]")}>
+          <form
+            className={cn("flex max-w-full items-center gap-[14px] rounded-full border border-[#D0D3DB] bg-white py-[5px] pl-[18px] pr-[5px]", showFilters ? "w-[439px]" : "w-[650px]")}
+            onSubmit={(event) => {
+              event.preventDefault();
+              onSearch?.();
+            }}
+          >
             <label className="sr-only" htmlFor="header-search">검색어</label>
             <input
               className="min-w-0 flex-1 bg-transparent text-[16px] font-medium text-[#222831] outline-none placeholder:text-[#67728A]"
               id="header-search"
+              onChange={(event) => onSearchValueChange?.(event.target.value)}
               placeholder="검색어를 입력해주세요."
               type="search"
+              value={searchValue}
             />
-            <button aria-label="검색" className="grid size-[32px] cursor-pointer place-items-center" type="button">
+            <button aria-label="검색" className="grid size-[32px] cursor-pointer place-items-center" type="submit">
               <Image alt="" aria-hidden height={32} src="/icons/Search.svg" width={32} />
             </button>
-          </div>
+          </form>
         </div>
       )}
     </header>

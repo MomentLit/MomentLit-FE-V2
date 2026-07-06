@@ -6,6 +6,7 @@ type FilterChipProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   active?: boolean;
   chipType?: "button" | "select" | "tag";
   children?: ReactNode;
+  compact?: boolean;
 };
 
 export default function FilterChip({
@@ -13,6 +14,7 @@ export default function FilterChip({
   chipType = "button",
   children,
   className,
+  compact = false,
   ...props
 }: FilterChipProps) {
   const isTag = chipType === "tag";
@@ -22,9 +24,12 @@ export default function FilterChip({
   return (
     <button
       className={cn(
-        "inline-flex min-h-[61px] items-center gap-[4px] rounded-[12px] px-[24px] py-[16px] text-[24px] font-semibold leading-none transition-colors",
+        "inline-flex items-center rounded-[12px] font-semibold leading-none transition-colors",
+        compact
+          ? "min-h-[36px] gap-[2px] px-[14px] py-[9px] !text-[12px] !font-semibold !leading-none"
+          : "min-h-[61px] gap-[4px] px-[24px] py-[16px] text-[24px]",
         active && !isTag && "bg-[#00ADB5] text-[#E6F7F8]",
-        !active && "bg-[#D0D3DB] text-[#5E687E]",
+        !active && (compact ? "bg-[#EDEDED] text-[#5E687E]" : "bg-[#D0D3DB] text-[#5E687E]"),
         isTag && "bg-[#B3E6EA] text-[#00ADB5]",
         className,
       )}
@@ -32,7 +37,9 @@ export default function FilterChip({
       {...props}
     >
       <span>{label}</span>
-      {isSelect && <span className="rotate-90 text-[22px] leading-none">›</span>}
+      {isSelect && (
+        <span className={cn("rotate-90 leading-none", compact ? "text-[11px]" : "text-[22px]")}>›</span>
+      )}
       {isTag && <span className="text-[28px] leading-none text-[#67728A]">×</span>}
     </button>
   );
