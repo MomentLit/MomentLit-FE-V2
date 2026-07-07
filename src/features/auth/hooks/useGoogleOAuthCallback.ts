@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { oauthGoogleCallback } from "@/apis/auth";
 import { OAUTH_CALLBACK_CODE_KEY, OAUTH_STATE_KEY } from "@/apis/auth/get";
-import { setAuthTokens } from "@/apis/auth/tokenStorage";
+import { getAccessToken, setAuthTokens } from "@/apis/auth/tokenStorage";
 
 export function useGoogleOAuthCallback() {
   const router = useRouter();
@@ -33,14 +33,16 @@ export function useGoogleOAuthCallback() {
         return;
       }
 
-      if (sessionStorage.getItem(OAUTH_CALLBACK_CODE_KEY) === code) return;
+      if (sessionStorage.getItem(OAUTH_CALLBACK_CODE_KEY) === code) {
+        if (getAccessToken()) router.replace("/main");
+        return;
+      }
       sessionStorage.setItem(OAUTH_CALLBACK_CODE_KEY, code);
 
       try {
         const response = await oauthGoogleCallback(code, state);
         setAuthTokens(response.data.access_token, response.data.refresh_token);
         sessionStorage.removeItem(OAUTH_STATE_KEY);
-        sessionStorage.removeItem(OAUTH_CALLBACK_CODE_KEY);
         router.replace("/main");
       } catch (requestError) {
         const message = axios.isAxiosError<{ message?: string }>(requestError)

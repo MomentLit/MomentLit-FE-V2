@@ -13,6 +13,7 @@ export const oauthGoogle = async (): Promise<void> => {
 
   const state = crypto.randomUUID();
   sessionStorage.setItem(OAUTH_STATE_KEY, state);
+  sessionStorage.removeItem(OAUTH_CALLBACK_CODE_KEY);
 
   const params = new URLSearchParams({ state });
   window.location.href = `${getApiBaseUrl()}/auth/oauth/google?${params.toString()}`;
