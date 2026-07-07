@@ -4,6 +4,7 @@ import type { OAuthGoogleCallbackResponse } from "@/types/auth";
 import type { ApiResponse } from "@/types/common";
 
 export const OAUTH_STATE_KEY = "momentlit_google_oauth_state";
+export const OAUTH_CALLBACK_CODE_KEY = "momentlit_google_oauth_callback_code";
 
 export const oauthGoogle = async (): Promise<void> => {
   if (typeof window === "undefined") {
@@ -12,6 +13,7 @@ export const oauthGoogle = async (): Promise<void> => {
 
   const state = crypto.randomUUID();
   sessionStorage.setItem(OAUTH_STATE_KEY, state);
+  sessionStorage.removeItem(OAUTH_CALLBACK_CODE_KEY);
 
   const params = new URLSearchParams({ state });
   window.location.href = `${getApiBaseUrl()}/auth/oauth/google?${params.toString()}`;
