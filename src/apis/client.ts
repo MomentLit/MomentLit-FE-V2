@@ -7,7 +7,12 @@ import {
   setAuthTokens,
 } from "@/apis/auth/tokenStorage";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
+const resolveBaseUrl = () =>
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
+  process.env.API_BASE_URL?.replace(/\/$/, "") ??
+  "/api";
+
+const BASE_URL = resolveBaseUrl();
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
