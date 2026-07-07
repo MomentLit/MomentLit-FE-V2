@@ -1,2 +1,2 @@
-export { oauthGoogle, oauthGoogleCallback } from "./get";
+export { oauthGoogle } from "./get";
 export { refresh, signIn, signOut } from "./post";
