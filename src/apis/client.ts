@@ -6,11 +6,10 @@ import {
   getRefreshToken,
   setAuthTokens,
 } from "@/apis/auth/tokenStorage";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
+import { API_BASE_URL } from "@/apis/env";
 
 export const apiClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -43,7 +42,7 @@ apiClient.interceptors.response.use(
         try {
           if (!refreshPromise) {
             refreshPromise = axios
-              .post(`${BASE_URL}/auth/refresh`, {
+              .post(`${API_BASE_URL}/auth/refresh`, {
                 refresh_token: refreshToken,
               })
               .then((res) => {
