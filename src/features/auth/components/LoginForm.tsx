@@ -1,10 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
-import { oauthGoogle } from "@/apis/auth";
 import Button from "@/components/common/Button";
 import Checkbox from "@/components/common/Checkbox";
 import Input from "@/components/common/Input";
@@ -80,16 +78,6 @@ export default function LoginForm() {
           type="submit"
         >
           {isLoading ? "로그인 중" : "로그인"}
-        </Button>
-        <Button
-          className="h-[57px] gap-[9px] rounded-[13px] border border-[#D0D3DB] px-[22px] py-[17px] text-[17px] font-semibold text-[#222831]"
-          fullWidth
-          onClick={() => void oauthGoogle()}
-          size="custom"
-          variant="secondary"
-        >
-          <Image alt="" aria-hidden height={26} src="/icons/google.svg" width={26} />
-          Google로 시작하기
         </Button>
       </div>
       <Link className="text-center text-[13px] font-medium text-[#67728A]" href="/signup">
