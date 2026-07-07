@@ -15,7 +15,20 @@ export const apiClient = axios.create({
   },
 });
 
+const PUBLIC_ENDPOINTS = [
+  "/auth/signin",
+  "/auth/oauth/google",
+  "/users/signup",
+];
+
+const isPublicEndpoint = (url?: string): boolean => {
+  if (!url) return false;
+  return PUBLIC_ENDPOINTS.some((endpoint) => url.startsWith(endpoint));
+};
+
 apiClient.interceptors.request.use((config) => {
+  if (isPublicEndpoint(config.url)) return config;
+
   const accessToken = getAccessToken();
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
