@@ -11,15 +11,9 @@ export const oauthGoogle = async (): Promise<void> => {
     throw new Error("oauthGoogle is only available in the browser");
   }
 
-  const state = crypto.randomUUID();
-  sessionStorage.setItem(OAUTH_STATE_KEY, state);
   sessionStorage.removeItem(OAUTH_CALLBACK_CODE_KEY);
-  document.cookie = `${OAUTH_STATE_KEY}=${encodeURIComponent(
-    state
-  )}; path=/auth/oauth/google/callback; max-age=600; SameSite=Lax`;
 
-  const params = new URLSearchParams({ state });
-  window.location.href = `${getApiBaseUrl()}/auth/oauth/google?${params.toString()}`;
+  window.location.href = `${getApiBaseUrl()}/auth/oauth/google`;
 };
 
 export const oauthGoogleCallback = async (
