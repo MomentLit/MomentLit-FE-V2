@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { oauthGoogleCallback } from "@/apis/auth";
-import { OAUTH_CALLBACK_CODE_KEY, OAUTH_STATE_KEY } from "@/apis/auth/get";
+import { OAUTH_STATE_KEY } from "@/apis/auth/get";
 import { setAuthTokens } from "@/apis/auth/tokenStorage";
 
 export function useGoogleOAuthCallback() {
@@ -19,18 +19,9 @@ export function useGoogleOAuthCallback() {
     hasRequested.current = true;
 
     const completeLogin = async () => {
-      const accessToken = searchParams.get("access_token");
-      const refreshToken = searchParams.get("refresh_token");
       const code = searchParams.get("code");
       const state = searchParams.get("state") ?? undefined;
       const expectedState = sessionStorage.getItem(OAUTH_STATE_KEY);
-
-      if (accessToken && refreshToken) {
-        setAuthTokens(accessToken, refreshToken);
-        sessionStorage.removeItem(OAUTH_STATE_KEY);
-        router.replace("/main");
-        return;
-      }
 
       if (!code) {
         setError("Google 로그인 이후 토큰 전달 방식 확인이 필요합니다.");
@@ -42,9 +33,6 @@ export function useGoogleOAuthCallback() {
         return;
       }
 
-      if (sessionStorage.getItem(OAUTH_CALLBACK_CODE_KEY) === code) return;
-      sessionStorage.setItem(OAUTH_CALLBACK_CODE_KEY, code);
-
       try {
         const response = await oauthGoogleCallback(code, state);
         setAuthTokens(response.data.access_token, response.data.refresh_token);
@@ -54,7 +42,6 @@ export function useGoogleOAuthCallback() {
         const message = axios.isAxiosError<{ message?: string }>(requestError)
           ? requestError.response?.data?.message
           : undefined;
-        sessionStorage.removeItem(OAUTH_CALLBACK_CODE_KEY);
         setError(message ?? "Google 로그인 처리 중 오류가 발생했습니다.");
       }
     };
