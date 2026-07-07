@@ -2,10 +2,18 @@
 
 import Link from "next/link";
 
+import type { OAuthGoogleCallbackResult } from "@/types/auth";
+
 import { useGoogleOAuthCallback } from "../hooks/useGoogleOAuthCallback";
 
-export default function GoogleOAuthCallbackScreen() {
-  const { error } = useGoogleOAuthCallback();
+type GoogleOAuthCallbackScreenProps = {
+  result: OAuthGoogleCallbackResult;
+};
+
+export default function GoogleOAuthCallbackScreen({
+  result,
+}: GoogleOAuthCallbackScreenProps) {
+  const { error } = useGoogleOAuthCallback(result);
 
   return (
     <main className="grid min-h-screen place-items-center bg-[#EEEEEE] px-[24px]">
