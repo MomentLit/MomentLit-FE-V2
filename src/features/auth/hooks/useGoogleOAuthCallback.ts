@@ -1,6 +1,5 @@
 "use client";
 
-import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -38,8 +37,8 @@ export function useGoogleOAuthCallback() {
         sessionStorage.removeItem(OAUTH_STATE_KEY);
         router.replace("/main");
       } catch (requestError) {
-        const message = axios.isAxiosError(requestError)
-          ? requestError.response?.data?.message
+        const message = requestError instanceof Error
+          ? requestError.message
           : undefined;
         setError(message ?? "Google 로그인 처리 중 오류가 발생했습니다.");
       }
