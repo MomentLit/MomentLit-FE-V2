@@ -3,8 +3,12 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { OAUTH_STATE_KEY, oauthGoogleCallback } from "@/apis/auth/get";
-import { setAuthTokens } from "@/apis/auth/tokenStorage";
+import {
+  OAUTH_CALLBACK_CODE_KEY,
+  OAUTH_STATE_KEY,
+  oauthGoogleCallback,
+} from "@/apis/auth/get";
+import { getAccessToken, setAuthTokens } from "@/apis/auth/tokenStorage";
 
 export function useGoogleOAuthCallback() {
   const router = useRouter();
@@ -31,6 +35,12 @@ export function useGoogleOAuthCallback() {
         return;
       }
 
+      if (sessionStorage.getItem(OAUTH_CALLBACK_CODE_KEY) === code) {
+        if (getAccessToken()) router.replace("/main");
+        return;
+      }
+      sessionStorage.setItem(OAUTH_CALLBACK_CODE_KEY, code);
+
       try {
         const response = await oauthGoogleCallback(code, state);
         setAuthTokens(response.data.access_token, response.data.refresh_token);
@@ -40,6 +50,7 @@ export function useGoogleOAuthCallback() {
         const message = requestError instanceof Error
           ? requestError.message
           : undefined;
+        sessionStorage.removeItem(OAUTH_CALLBACK_CODE_KEY);
         setError(message ?? "Google 로그인 처리 중 오류가 발생했습니다.");
       }
     };
