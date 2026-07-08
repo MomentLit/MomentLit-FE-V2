@@ -6,17 +6,29 @@ import {
   getRefreshToken,
   setAuthTokens,
 } from "@/apis/auth/tokenStorage";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
+import { API_BASE_URL } from "@/apis/env";
 
 export const apiClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+const PUBLIC_ENDPOINTS = [
+  "/auth/signin",
+  "/auth/oauth/google",
+  "/users/signup",
+];
+
+const isPublicEndpoint = (url?: string): boolean => {
+  if (!url) return false;
+  return PUBLIC_ENDPOINTS.some((endpoint) => url.startsWith(endpoint));
+};
+
 apiClient.interceptors.request.use((config) => {
+  if (isPublicEndpoint(config.url)) return config;
+
   const accessToken = getAccessToken();
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -43,7 +55,7 @@ apiClient.interceptors.response.use(
         try {
           if (!refreshPromise) {
             refreshPromise = axios
-              .post(`${BASE_URL}/auth/refresh`, {
+              .post(`${API_BASE_URL}/auth/refresh`, {
                 refresh_token: refreshToken,
               })
               .then((res) => {
