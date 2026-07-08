@@ -19,7 +19,7 @@ export function useGoogleOAuthCallback() {
 
     const completeLogin = async () => {
       const code = searchParams.get("code");
-      const state = searchParams.get("state");
+      const state = searchParams.get("state") ?? undefined;
       const expectedState = sessionStorage.getItem(OAUTH_STATE_KEY);
 
       if (!code) {
@@ -27,7 +27,7 @@ export function useGoogleOAuthCallback() {
         return;
       }
 
-      if (!state || !expectedState || state !== expectedState) {
+      if (expectedState && state !== expectedState) {
         setError("Google 로그인 요청을 확인할 수 없습니다. 다시 시도해주세요.");
         return;
       }

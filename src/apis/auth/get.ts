@@ -4,19 +4,15 @@ import type { ApiResponse } from "@/types/common";
 
 export const OAUTH_STATE_KEY = "momentlit_google_oauth_state";
 
-export const oauthGoogle = async (state?: string): Promise<void> => {
+export const oauthGoogle = async (): Promise<void> => {
   if (typeof window === "undefined") {
     throw new Error("oauthGoogle is only available in the browser");
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
 
-  const oauthState = state ?? crypto.randomUUID();
-  sessionStorage.setItem(OAUTH_STATE_KEY, oauthState);
-
-  const params = new URLSearchParams({ state: oauthState });
-  const query = params.toString();
-  window.location.href = `${baseUrl}/auth/oauth/google${query ? `?${query}` : ""}`;
+  sessionStorage.removeItem(OAUTH_STATE_KEY);
+  window.location.href = `${baseUrl}/auth/oauth/google`;
 };
 
 export const oauthGoogleCallback = async (
