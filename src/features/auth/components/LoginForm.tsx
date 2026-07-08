@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
-import { oauthGoogle } from "@/apis/auth";
+import { startGoogleOAuth } from "@/apis/auth";
 import Button from "@/components/common/Button";
 import Checkbox from "@/components/common/Checkbox";
 import Input from "@/components/common/Input";
@@ -84,7 +84,7 @@ export default function LoginForm() {
         <Button
           className="h-[57px] gap-[9px] rounded-[13px] border border-[#D0D3DB] px-[22px] py-[17px] text-[17px] font-semibold text-[#222831]"
           fullWidth
-          onClick={() => void oauthGoogle()}
+          onClick={startGoogleOAuth}
           size="custom"
           variant="secondary"
         >

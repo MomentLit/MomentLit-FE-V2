@@ -4,48 +4,63 @@ import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { OAUTH_STATE_KEY, oauthGoogleCallback } from "@/apis/auth/get";
+import { exchangeGoogleOAuthCode } from "@/apis/auth";
 import { setAuthTokens } from "@/apis/auth/tokenStorage";
+
+const getRequestErrorMessage = (error: unknown): string => {
+  if (!axios.isAxiosError<{ message?: string }>(error)) {
+    return "Google 로그인 처리 중 오류가 발생했습니다.";
+  }
+
+  return error.response?.data?.message
+    ?? "Google 로그인 처리 중 오류가 발생했습니다.";
+};
 
 export function useGoogleOAuthCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const hasRequested = useRef(false);
+  const hasStarted = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (hasRequested.current) return;
-    hasRequested.current = true;
+    if (hasStarted.current) return;
+    hasStarted.current = true;
 
-    const completeLogin = async () => {
+    const completeGoogleLogin = async () => {
+      const providerError = searchParams.get("error");
+      const providerErrorDescription = searchParams.get("error_description");
       const code = searchParams.get("code");
       const state = searchParams.get("state");
-      const expectedState = sessionStorage.getItem(OAUTH_STATE_KEY);
 
-      if (!code) {
-        setError("Google 인증 코드가 전달되지 않았습니다.");
+      if (providerError) {
+        setError(providerErrorDescription ?? "Google 로그인이 취소되었거나 거부되었습니다.");
         return;
       }
 
-      if (!state || !expectedState || state !== expectedState) {
-        setError("Google 로그인 요청을 확인할 수 없습니다. 다시 시도해주세요.");
+      if (!code) {
+        setError("Google 인증 정보가 올바르게 전달되지 않았습니다.");
         return;
       }
 
       try {
-        const response = await oauthGoogleCallback(code, state);
-        setAuthTokens(response.data.access_token, response.data.refresh_token);
-        sessionStorage.removeItem(OAUTH_STATE_KEY);
+        const response = await exchangeGoogleOAuthCode({
+          code,
+          state: state ?? undefined,
+        });
+        const { access_token: accessToken, refresh_token: refreshToken } = response.data;
+
+        if (!accessToken || !refreshToken) {
+          throw new Error("OAuth token response is incomplete");
+        }
+
+        setAuthTokens(accessToken, refreshToken);
         router.replace("/main");
       } catch (requestError) {
-        const message = axios.isAxiosError(requestError)
-          ? requestError.response?.data?.message
-          : undefined;
-        setError(message ?? "Google 로그인 처리 중 오류가 발생했습니다.");
+        setError(getRequestErrorMessage(requestError));
       }
     };
 
-    void completeLogin();
+    void completeGoogleLogin();
   }, [router, searchParams]);
 
   return { error };
