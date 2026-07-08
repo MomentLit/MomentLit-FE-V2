@@ -108,20 +108,8 @@ export function useCreateSpace() {
     if (isSubmitting) return;
 
     const pricePerHour = Number(form.pricePerHour);
-    const addressParts = splitRoadAddress(form.roadAddress);
-
     if (!form.name.trim() || !form.roadAddress.trim() || !form.category || !Number.isFinite(pricePerHour) || pricePerHour <= 0) {
       setError("제목, 시간당 가격, 주소, 카테고리를 확인해주세요.");
-      return;
-    }
-
-    if (!addressParts.sido || !addressParts.sigungu) {
-      setError("도로명 주소를 시/도와 시군구가 포함되도록 입력해주세요.");
-      return;
-    }
-
-    if (imageUrls.length === 0) {
-      setError("대표 이미지를 1장 이상 등록해주세요.");
       return;
     }
 
@@ -129,13 +117,11 @@ export function useCreateSpace() {
     setError(null);
 
     try {
-      const thumbnailUrl = imageUrls[0];
-
       const response = await createSpace({
         name: form.name.trim(),
         description: form.description.trim() || null,
         address: buildAddressRequest(form),
-        thumbnail_url: thumbnailUrl,
+        thumbnail_url: imageUrls[0] ?? "",
         image_urls: imageUrls.slice(1),
         price_per_hour: pricePerHour,
         category: form.category,
@@ -144,10 +130,14 @@ export function useCreateSpace() {
 
       const spaceId = response.data.space_id;
       if (form.startDate && form.endDate) {
-        await createSchedule(spaceId, {
-          start_time: `${form.startDate}T00:00:00`,
-          end_time: `${form.endDate}T23:59:59`,
-        });
+        try {
+          await createSchedule(spaceId, {
+            start_time: `${form.startDate}T00:00:00`,
+            end_time: `${form.endDate}T23:59:59`,
+          });
+        } catch {
+          // 일정 등록 실패가 공간 등록 성공 후 상세 페이지 이동을 막지 않게 한다.
+        }
       }
 
       router.push(`/spaces/${spaceId}`);
