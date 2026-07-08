@@ -1,33 +1,30 @@
 import { apiClient } from "@/apis/client";
-import type { OAuthGoogleCallbackResponse } from "@/types/auth";
 import type { ApiResponse } from "@/types/common";
+import type {
+  GoogleOAuthCallbackRequest,
+  GoogleOAuthCallbackResponse,
+} from "@/types/auth";
 
-export const OAUTH_STATE_KEY = "momentlit_google_oauth_state";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
 
-export const oauthGoogle = async (state?: string): Promise<void> => {
+export const startGoogleOAuth = (): void => {
   if (typeof window === "undefined") {
-    throw new Error("oauthGoogle is only available in the browser");
+    throw new Error("Google OAuth can only start in the browser");
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
-
-  const oauthState = state ?? crypto.randomUUID();
-  sessionStorage.setItem(OAUTH_STATE_KEY, oauthState);
-
-  const params = new URLSearchParams({ state: oauthState });
-  const query = params.toString();
-  window.location.href = `${baseUrl}/auth/oauth/google${query ? `?${query}` : ""}`;
+  window.location.assign(`${API_BASE_URL}/auth/oauth/google`);
 };
 
-export const oauthGoogleCallback = async (
-  code: string,
-  state?: string
-): Promise<ApiResponse<OAuthGoogleCallbackResponse>> => {
+export const exchangeGoogleOAuthCode = async ({
+  code,
+  state,
+}: GoogleOAuthCallbackRequest): Promise<ApiResponse<GoogleOAuthCallbackResponse>> => {
   const params = new URLSearchParams({ code });
   if (state) params.set("state", state);
-  const response =
-    await apiClient.get<ApiResponse<OAuthGoogleCallbackResponse>>(
-      `/auth/oauth/google/callback?${params.toString()}`
-    );
+
+  const response = await apiClient.get<ApiResponse<GoogleOAuthCallbackResponse>>(
+    `/auth/oauth/google/callback?${params.toString()}`,
+  );
+
   return response.data;
 };

@@ -673,6 +673,25 @@ export const getSpaces = async (): Promise<
 * 인증 토큰이 필요한 경우 interceptor에서 처리한다.
 * 사용처는 `@/apis/{domain}`에서 함수를 import하거나 namespace import를 사용한다.
 
+### Google OAuth 흐름
+
+Google OAuth는 프런트엔드 callback 방식을 사용한다.
+
+```text
+LoginForm
+ → GET /api/auth/oauth/google
+ → Google 인증
+ → /auth/oauth/google/callback?code=...[&state=...]
+ → GET /api/auth/oauth/google/callback?code=...[&state=...]
+ → access/refresh token 저장
+ → /main
+```
+
+* 프런트엔드 callback은 Google이 전달한 `code`를 백엔드 callback API에 전달한다.
+* `state`가 함께 전달된 경우에는 백엔드 callback API에 그대로 전달한다.
+* 백엔드가 반환한 access/refresh token은 현재 인증 정책에 따라 `localStorage`에 저장한다.
+* Google Console과 백엔드의 redirect URI는 프런트엔드 `/auth/oauth/google/callback`과 완전히 일치해야 한다.
+
 ---
 
 ## 9. 상태 관리 기준

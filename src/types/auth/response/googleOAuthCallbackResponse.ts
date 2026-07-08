@@ -1,4 +1,4 @@
-export type OAuthGoogleCallbackResponse = {
+export type GoogleOAuthCallbackResponse = {
   name: string;
   role: string;
   access_token: string;

@@ -12,8 +12,9 @@ type ProfileEditPanelProps = {
 };
 
 export default function ProfileEditPanel({ profile, onSave }: ProfileEditPanelProps) {
+  const initialPhone = profile.phone?.trim() ?? "";
   const [name, setName] = useState(profile.name);
-  const [phone, setPhone] = useState(profile.phone ?? "");
+  const [phone, setPhone] = useState(initialPhone);
   const [intro, setIntro] = useState(profile.intro ?? "");
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -24,7 +25,7 @@ export default function ProfileEditPanel({ profile, onSave }: ProfileEditPanelPr
     setMessage(null);
 
     try {
-      await onSave({ name, phone, intro });
+      await onSave({ name, phone: phone.trim() || null, intro });
       setMessage("프로필이 저장되었습니다.");
     } catch {
       setMessage("프로필을 저장하지 못했습니다.");
@@ -40,7 +41,14 @@ export default function ProfileEditPanel({ profile, onSave }: ProfileEditPanelPr
         <div className="grid gap-[24px] md:grid-cols-3">
           <Input containerClassName="w-full" label="이름" onChange={(event) => setName(event.target.value)} value={name} />
           <Input className="bg-[#F7F7F7] text-[#67728A]" containerClassName="w-full" disabled label="이메일" type="email" value={profile.email} />
-          <Input containerClassName="w-full" label="연락처" onChange={(event) => setPhone(event.target.value)} type="tel" value={phone} />
+          <Input
+            containerClassName="w-full"
+            label="연락처"
+            onChange={(event) => setPhone(event.target.value)}
+            placeholder="연락처를 입력해주세요."
+            type="tel"
+            value={phone}
+          />
         </div>
         <label className="flex flex-col gap-[4px]">
           <span className="text-[16px] font-medium text-[#222831]">소개말</span>
@@ -55,7 +63,7 @@ export default function ProfileEditPanel({ profile, onSave }: ProfileEditPanelPr
           {message && <p className="mr-auto text-[14px] text-[#67728A]" role="status">{message}</p>}
           <Button className="w-[160px] bg-[#F7F7F7] text-[#67728A] hover:bg-[#EEEEEE]" disabled={isSaving} onClick={() => {
             setName(profile.name);
-            setPhone(profile.phone ?? "");
+            setPhone(initialPhone);
             setIntro(profile.intro ?? "");
           }} size="custom" variant="secondary">
             취소
