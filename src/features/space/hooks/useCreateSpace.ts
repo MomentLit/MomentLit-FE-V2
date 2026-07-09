@@ -60,6 +60,12 @@ const buildAddressRequest = (form: SpaceCreateForm): AddressRequest => {
   return address;
 };
 
+const FALLBACK_THUMBNAIL_URL = "https://placehold.co/800x600?text=MomentLit";
+
+const isHttpUrl = (value: string) => /^https?:\/\//.test(value);
+
+const getSpaceImageUrls = (imageUrls: string[]) => imageUrls.filter(isHttpUrl);
+
 const getSpaceId = (response: Awaited<ReturnType<typeof createSpace>>) => {
   const data = response.data as { space_id?: number; id?: number };
   return data.space_id ?? data.id;
@@ -122,6 +128,7 @@ export function useCreateSpace() {
     setError(null);
 
     try {
+      const [thumbnailUrl = FALLBACK_THUMBNAIL_URL, ...additionalImageUrls] = getSpaceImageUrls(imageUrls);
       let submitPhone = phone.trim();
       if (!submitPhone) {
         const profileResponse = await getMyProfile();
@@ -138,8 +145,8 @@ export function useCreateSpace() {
         name: form.name.trim(),
         description: form.description.trim() || null,
         address: buildAddressRequest(form),
-        thumbnail_url: imageUrls[0] ?? "",
-        image_urls: imageUrls.slice(1),
+        thumbnail_url: thumbnailUrl,
+        image_urls: additionalImageUrls,
         price_per_hour: pricePerHour,
         category: form.category,
         phone: submitPhone,
