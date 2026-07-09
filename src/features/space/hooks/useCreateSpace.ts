@@ -60,6 +60,11 @@ const buildAddressRequest = (form: SpaceCreateForm): AddressRequest => {
   return address;
 };
 
+const getSpaceId = (response: Awaited<ReturnType<typeof createSpace>>) => {
+  const data = response.data as { space_id?: number; id?: number };
+  return data.space_id ?? data.id;
+};
+
 export function useCreateSpace() {
   const router = useRouter();
   const [form, setForm] = useState<SpaceCreateForm>(initialForm);
@@ -117,6 +122,18 @@ export function useCreateSpace() {
     setError(null);
 
     try {
+      let submitPhone = phone.trim();
+      if (!submitPhone) {
+        const profileResponse = await getMyProfile();
+        submitPhone = profileResponse.data.phone?.trim() ?? "";
+        setPhone(submitPhone);
+      }
+
+      if (!submitPhone) {
+        setError("공간 등록을 위해 전화번호가 필요합니다. 마이페이지에서 전화번호를 등록해주세요.");
+        return;
+      }
+
       const response = await createSpace({
         name: form.name.trim(),
         description: form.description.trim() || null,
@@ -125,10 +142,15 @@ export function useCreateSpace() {
         image_urls: imageUrls.slice(1),
         price_per_hour: pricePerHour,
         category: form.category,
-        phone,
+        phone: submitPhone,
       });
 
-      const spaceId = response.data.space_id;
+      const spaceId = getSpaceId(response);
+      if (!spaceId) {
+        router.push("/my?tab=spaces");
+        return;
+      }
+
       if (form.startDate && form.endDate) {
         try {
           await createSchedule(spaceId, {
