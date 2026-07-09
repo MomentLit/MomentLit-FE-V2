@@ -62,9 +62,21 @@ const buildAddressRequest = (form: SpaceCreateForm): AddressRequest => {
 
 const FALLBACK_THUMBNAIL_URL = "https://placehold.co/800x600?text=MomentLit";
 
-const isHttpUrl = (value: string) => /^https?:\/\//.test(value);
+const isSpaceImageSource = (value: string) => /^https?:\/\//.test(value);
 
-const getSpaceImageUrls = (imageUrls: string[]) => imageUrls.filter(isHttpUrl);
+const getSpaceImageUrls = (imageUrls: string[]) => imageUrls.filter(isSpaceImageSource);
+
+const toSpaceCategoryRequestValue = (category: string) => {
+  const categoryMap: Record<string, string> = {
+    "기타": "OTHER",
+    "쇼룸": "POPUP_STORE",
+    "스튜디오": "STUDIO",
+    "연습실": "PRACTICE_ROOM",
+    "카페": "CAFE",
+  };
+
+  return categoryMap[category] ?? category;
+};
 
 const getSpaceId = (response: Awaited<ReturnType<typeof createSpace>>) => {
   const data = response.data as { space_id?: number; id?: number };
@@ -148,7 +160,7 @@ export function useCreateSpace() {
         thumbnail_url: thumbnailUrl,
         image_urls: additionalImageUrls,
         price_per_hour: pricePerHour,
-        category: form.category,
+        category: toSpaceCategoryRequestValue(form.category),
         phone: submitPhone,
       });
 

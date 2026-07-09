@@ -37,7 +37,7 @@ function EmptyList({ children }: { children: string }) {
 }
 
 export default function MySpacesPanel({ spaces, popups, matchings, isLoading, error }: MySpacesPanelProps) {
-  const activeSpaces = spaces.filter((space) => space.is_active && space.admin_status === "APPROVED").length;
+  const activeSpaces = spaces.filter((space) => space.is_active).length;
   const newRequests = matchings.filter((matching) => matching.status === "REQUESTED").length;
 
   return (
@@ -70,7 +70,9 @@ export default function MySpacesPanel({ spaces, popups, matchings, isLoading, er
           {spaces.length === 0 ? <EmptyList>등록된 공간이 없습니다.</EmptyList> : (
             <div className="grid gap-[24px] md:grid-cols-2 xl:grid-cols-3">
               {spaces.map((space) => (
-                <AssetCard address={space.address.road_address} imageUrl={space.thumbnail_url || undefined} key={space.space_id} title={space.name} />
+                <Link href={`/spaces/${space.space_id}`} key={space.space_id}>
+                  <AssetCard address={space.address.road_address} imageUrl={space.thumbnail_url || undefined} title={space.name} />
+                </Link>
               ))}
             </div>
           )}

@@ -273,6 +273,16 @@ export default function Header({
               type="search"
               value={searchValue}
             />
+            {searchValue && (
+              <button
+                aria-label="검색어 지우기"
+                className="grid size-[24px] cursor-pointer place-items-center text-[20px] font-bold leading-none text-[#4F7DBE]"
+                onClick={() => onSearchValueChange?.("")}
+                type="button"
+              >
+                ×
+              </button>
+            )}
             <button aria-label="검색" className="grid size-[32px] cursor-pointer place-items-center" type="submit">
               <Image alt="" aria-hidden height={32} src="/icons/Search.svg" width={32} />
             </button>

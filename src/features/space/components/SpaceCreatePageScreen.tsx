@@ -135,11 +135,11 @@ export default function SpaceCreatePageScreen() {
                     value={spaceForm.form.category}
                   >
                     <option value="">카테고리 선택</option>
-                    <option value="카페">카페</option>
-                    <option value="쇼룸">쇼룸</option>
-                    <option value="스튜디오">스튜디오</option>
-                    <option value="연습실">연습실</option>
-                    <option value="기타">기타</option>
+                    <option value="CAFE">카페</option>
+                    <option value="POPUP_STORE">쇼룸</option>
+                    <option value="STUDIO">스튜디오</option>
+                    <option value="PRACTICE_ROOM">연습실</option>
+                    <option value="OTHER">기타</option>
                   </select>
                   <span className="pointer-events-none absolute right-[14px] top-1/2 -translate-y-1/2 rotate-90 text-[#67728A]">›</span>
                 </span>

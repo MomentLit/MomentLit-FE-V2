@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { getSpaces } from "@/apis/space";
 import type { SpaceListSearchResponse } from "@/types/space";
@@ -8,9 +9,12 @@ import type { SpaceListSearchResponse } from "@/types/space";
 const PAGE_SIZE = 12;
 
 export function useSpaceSearch() {
-  const [searchValue, setSearchValue] = useState("");
-  const [submittedName, setSubmittedName] = useState("");
-  const [category, setCategory] = useState("");
+  const searchParams = useSearchParams();
+  const initialName = searchParams.get("name") ?? "";
+  const initialCategory = searchParams.get("category") ?? "";
+  const [searchValue, setSearchValue] = useState(initialName);
+  const [submittedName, setSubmittedName] = useState(initialName);
+  const [category, setCategory] = useState(initialCategory);
   const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const [spaces, setSpaces] = useState<SpaceListSearchResponse[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
