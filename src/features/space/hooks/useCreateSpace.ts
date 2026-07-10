@@ -75,6 +75,8 @@ const uploadSpaceImages = async (imageFiles: (File | null)[]) => {
   return uploadedUrls.filter((url): url is string => Boolean(url));
 };
 
+const hasLocalImagePreview = (imageUrls: string[]) => imageUrls.some((url) => url.startsWith("data:image/"));
+
 const toSpaceCategoryRequestValue = (category: string) => {
   const categoryMap: Record<string, string> = {
     "기타": "OTHER",
@@ -165,6 +167,11 @@ export function useCreateSpace() {
       }
 
       const uploadedImageUrls = await uploadSpaceImages(imageFiles);
+      if (hasLocalImagePreview(imageUrls) && uploadedImageUrls.length === 0) {
+        setError("이미지를 업로드하지 못했습니다. 다시 시도해주세요.");
+        return;
+      }
+
       const [thumbnailUrl = FALLBACK_THUMBNAIL_URL, ...additionalImageUrls] = [
         ...uploadedImageUrls,
         ...getSpaceImageUrls(imageUrls),

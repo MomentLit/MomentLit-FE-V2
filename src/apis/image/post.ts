@@ -14,6 +14,11 @@ export const uploadImage = async (
   const response = await apiClient.post<ApiResponse<ImageUploadResponse>>(
     "/images/upload",
     formData,
+    {
+      headers: {
+        "Content-Type": undefined,
+      },
+    },
   );
 
   return response.data;
