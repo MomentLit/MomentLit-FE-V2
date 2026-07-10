@@ -8,17 +8,9 @@ type ImageUploadResponse = {
 export const uploadImage = async (
   file: File
 ): Promise<ApiResponse<ImageUploadResponse>> => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const response = await apiClient.post<ApiResponse<ImageUploadResponse>>(
+  const response = await apiClient.postForm<ApiResponse<ImageUploadResponse>>(
     "/images/upload",
-    formData,
-    {
-      headers: {
-        "Content-Type": undefined,
-      },
-    },
+    { file },
   );
 
   return response.data;
