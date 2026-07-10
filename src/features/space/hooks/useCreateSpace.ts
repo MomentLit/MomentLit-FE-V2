@@ -4,6 +4,7 @@ import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { uploadImage } from "@/apis/image";
 import { createSchedule } from "@/apis/schedule";
 import { createSpace } from "@/apis/space";
 import { getMyProfile } from "@/apis/user";
@@ -66,6 +67,14 @@ const isSpaceImageSource = (value: string) => /^https?:\/\//.test(value);
 
 const getSpaceImageUrls = (imageUrls: string[]) => imageUrls.filter(isSpaceImageSource);
 
+const uploadSpaceImages = async (imageFiles: (File | null)[]) => {
+  const uploadedUrls = await Promise.all(
+    imageFiles.map((file) => file ? uploadImage(file).then((response) => response.data.image_url) : Promise.resolve(null)),
+  );
+
+  return uploadedUrls.filter((url): url is string => Boolean(url));
+};
+
 const toSpaceCategoryRequestValue = (category: string) => {
   const categoryMap: Record<string, string> = {
     "기타": "OTHER",
@@ -87,6 +96,7 @@ export function useCreateSpace() {
   const router = useRouter();
   const [form, setForm] = useState<SpaceCreateForm>(initialForm);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<(File | null)[]>([]);
   const [phone, setPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,6 +127,7 @@ export function useCreateSpace() {
       const selectedFiles = Array.from(files).slice(0, remainingCount);
       const nextImages = await Promise.all(selectedFiles.map(readFileAsDataUrl));
       setImageUrls((current) => [...current, ...nextImages].slice(0, 5));
+      setImageFiles((current) => [...current, ...selectedFiles].slice(0, 5));
       setError(null);
     } catch {
       setError("이미지를 불러오지 못했습니다.");
@@ -125,6 +136,7 @@ export function useCreateSpace() {
 
   const removeImage = useCallback((index: number) => {
     setImageUrls((current) => current.filter((_, imageIndex) => imageIndex !== index));
+    setImageFiles((current) => current.filter((_, imageIndex) => imageIndex !== index));
   }, []);
 
   const submit = useCallback(async () => {
@@ -140,7 +152,6 @@ export function useCreateSpace() {
     setError(null);
 
     try {
-      const [thumbnailUrl = FALLBACK_THUMBNAIL_URL, ...additionalImageUrls] = getSpaceImageUrls(imageUrls);
       let submitPhone = phone.trim();
       if (!submitPhone) {
         const profileResponse = await getMyProfile();
@@ -152,6 +163,12 @@ export function useCreateSpace() {
         setError("공간 등록을 위해 전화번호가 필요합니다. 마이페이지에서 전화번호를 등록해주세요.");
         return;
       }
+
+      const uploadedImageUrls = await uploadSpaceImages(imageFiles);
+      const [thumbnailUrl = FALLBACK_THUMBNAIL_URL, ...additionalImageUrls] = [
+        ...uploadedImageUrls,
+        ...getSpaceImageUrls(imageUrls),
+      ];
 
       const response = await createSpace({
         name: form.name.trim(),
@@ -190,7 +207,7 @@ export function useCreateSpace() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [form, imageUrls, isSubmitting, phone, router]);
+  }, [form, imageFiles, imageUrls, isSubmitting, phone, router]);
 
   return {
     addImages,
