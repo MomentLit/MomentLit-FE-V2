@@ -2,15 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 import { getAccessToken } from "@/apis/auth/tokenStorage";
 import {
   approveMatching,
   getReceivedMatchings,
+  getSentMatchings,
   rejectMatching,
 } from "@/apis/matching";
 import { getSpacePopupHistory } from "@/apis/popup";
-import { getMySpaces } from "@/apis/space";
+import { deleteSpace, getMySpaces } from "@/apis/space";
+import { getSpaceDetail } from "@/apis/space";
 import { updateMyProfile } from "@/apis/user";
 import type { MatchingListSearchResponse } from "@/types/matching";
 import type { SpacePopupHistoryListSearchResponse } from "@/types/popup";
@@ -26,6 +29,35 @@ export type MyPopupItem = SpacePopupHistoryListSearchResponse & {
   spaceName: string;
 };
 
+const enrichMatchingsWithSpaceName = async (
+  matchings: MatchingListSearchResponse[],
+): Promise<MatchingListSearchResponse[]> => {
+  const spaceIds = Array.from(
+    new Set(
+      matchings
+        .map((matching) => matching.space_id)
+        .filter((spaceId): spaceId is number => typeof spaceId === "number"),
+    ),
+  );
+
+  if (spaceIds.length === 0) return matchings;
+
+  const results = await Promise.allSettled(
+    spaceIds.map(async (spaceId) => {
+      const response = await getSpaceDetail(spaceId);
+      return [spaceId, response.data.name] as const;
+    }),
+  );
+  const spaceNameMap = new Map(
+    results.flatMap((result) => result.status === "fulfilled" ? [result.value] : []),
+  );
+
+  return matchings.map((matching) => ({
+    ...matching,
+    space_name: matching.space_name ?? (matching.space_id ? spaceNameMap.get(matching.space_id) : undefined),
+  }));
+};
+
 export function useMyPageData(tab: MyPageTab) {
   const router = useRouter();
   const {
@@ -39,6 +71,7 @@ export function useMyPageData(tab: MyPageTab) {
   const [spaces, setSpaces] = useState<MySpaceListSearchResponse[]>([]);
   const [popups, setPopups] = useState<MyPopupItem[]>([]);
   const [matchings, setMatchings] = useState<MatchingListSearchResponse[]>([]);
+  const [sentMatchings, setSentMatchings] = useState<MatchingListSearchResponse[]>([]);
   const [isContentLoading, setIsContentLoading] = useState(false);
   const [contentError, setContentError] = useState<string | null>(null);
 
@@ -67,8 +100,19 @@ export function useMyPageData(tab: MyPageTab) {
 
       try {
         if (tab === "matching") {
-          const response = await getReceivedMatchings();
-          if (isActive) setMatchings(response.data.matchings);
+          const [receivedResponse, sentResponse] = await Promise.all([
+            getReceivedMatchings(),
+            getSentMatchings(),
+          ]);
+          const [receivedMatchings, sentMatchings] = await Promise.all([
+            enrichMatchingsWithSpaceName(receivedResponse.data.matchings),
+            enrichMatchingsWithSpaceName(sentResponse.data.matchings),
+          ]);
+
+          if (isActive) {
+            setMatchings(receivedMatchings);
+            setSentMatchings(sentMatchings);
+          }
           return;
         }
 
@@ -119,14 +163,26 @@ export function useMyPageData(tab: MyPageTab) {
     matchingId: number,
     decision: "approve" | "reject",
   ) => {
-    if (decision === "approve") await approveMatching(matchingId);
-    else await rejectMatching(matchingId);
+    try {
+      if (decision === "approve") await approveMatching(matchingId);
+      else await rejectMatching(matchingId);
+    } catch (requestError) {
+      const message = axios.isAxiosError<{ message?: string }>(requestError)
+        ? requestError.response?.data?.message
+        : undefined;
+      throw new Error(message ?? "매칭 요청을 처리하지 못했습니다.");
+    }
 
     setMatchings((current) => current.map((matching) =>
       matching.matching_id === matchingId
         ? { ...matching, status: decision === "approve" ? "APPROVED" : "REJECTED" }
         : matching,
     ));
+  }, []);
+
+  const removeSpace = useCallback(async (spaceId: number) => {
+    await deleteSpace(spaceId);
+    setSpaces((current) => current.filter((space) => space.space_id !== spaceId));
   }, []);
 
   return {
@@ -141,7 +197,9 @@ export function useMyPageData(tab: MyPageTab) {
     popups,
     profile,
     profileError,
+    removeSpace,
     saveProfile,
+    sentMatchings,
     spaces,
   };
 }

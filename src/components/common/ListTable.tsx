@@ -8,7 +8,7 @@ type ListTableProps = {
   className?: string;
 };
 
-const defaultHeaders = ["팝업", "신청", "희망 공간", "요청일", "검토"];
+const defaultHeaders = ["공간", "신청", "희망 공간", "요청일", "검토"];
 const columnClass = ["w-[270px]", "w-[130px]", "w-[210px]", "w-[114px]", "w-[152px]"];
 
 export default function ListTable({ headers = defaultHeaders, rows = [], className }: ListTableProps) {

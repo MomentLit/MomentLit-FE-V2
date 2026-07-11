@@ -67,6 +67,13 @@ const isSpaceImageSource = (value: string) => /^https?:\/\//.test(value);
 
 const getSpaceImageUrls = (imageUrls: string[]) => imageUrls.filter(isSpaceImageSource);
 
+const getRequestErrorMessage = (requestError: unknown) => {
+  if (!axios.isAxiosError(requestError)) return undefined;
+
+  const responseData = requestError.response?.data as { message?: string } | undefined;
+  return responseData?.message;
+};
+
 const uploadSpaceImages = async (imageFiles: (File | null)[]) => {
   const uploadedUrls = await Promise.all(
     imageFiles.map((file) => file ? uploadImage(file).then((response) => response.data.image_url) : Promise.resolve(null)),
@@ -166,7 +173,15 @@ export function useCreateSpace() {
         return;
       }
 
-      const uploadedImageUrls = await uploadSpaceImages(imageFiles);
+      let uploadedImageUrls: string[];
+      try {
+        uploadedImageUrls = await uploadSpaceImages(imageFiles);
+      } catch (uploadError) {
+        const message = getRequestErrorMessage(uploadError);
+        setError(message ? `이미지를 업로드하지 못했습니다. ${message}` : "이미지를 업로드하지 못했습니다. 다시 시도해주세요.");
+        return;
+      }
+
       if (hasLocalImagePreview(imageUrls) && uploadedImageUrls.length === 0) {
         setError("이미지를 업로드하지 못했습니다. 다시 시도해주세요.");
         return;
@@ -207,9 +222,7 @@ export function useCreateSpace() {
 
       router.push(`/spaces/${spaceId}`);
     } catch (requestError) {
-      const message = axios.isAxiosError(requestError)
-        ? requestError.response?.data?.message
-        : undefined;
+      const message = getRequestErrorMessage(requestError);
       setError(message ?? "공간을 등록하지 못했습니다. 입력한 내용을 확인해주세요.");
     } finally {
       setIsSubmitting(false);

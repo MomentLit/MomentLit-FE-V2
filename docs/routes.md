@@ -11,3 +11,4 @@
 | /my | MyPage | 정보 수정, 공간/팝업, 매칭, 관리자 승인 탭을 제공하는 마이페이지 | O |
 | /search | SearchPage | 장소/팝업 검색 페이지 | O |
 | /spaces/create | SpaceCreatePage | 장소 만들기 | O |
+| /spaces/:spaceId/edit | SpaceEditPage | 내가 등록한 공간 수정 페이지 | O |

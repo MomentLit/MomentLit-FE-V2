@@ -47,10 +47,24 @@ export default function MyPageScreen({ tab }: MyPageScreenProps) {
             <ProfileEditPanel key={data.profile.email} onSave={data.saveProfile} profile={data.profile} />
           )}
           {tab === "spaces" && (
-            <MySpacesPanel error={data.contentError} isLoading={data.isContentLoading} matchings={data.matchings} popups={data.popups} spaces={data.spaces} />
+            <MySpacesPanel
+              error={data.contentError}
+              isLoading={data.isContentLoading}
+              matchings={data.matchings}
+              onDeleteSpace={data.removeSpace}
+              popups={data.popups}
+              spaces={data.spaces}
+            />
           )}
           {tab === "matching" && (
-            <MyMatchingPanel error={data.contentError} isLoading={data.isContentLoading} matchings={data.matchings} onDecision={data.decideMatching} />
+            <MyMatchingPanel
+              error={data.contentError}
+              isLoading={data.isContentLoading}
+              matchings={data.matchings}
+              onDecision={data.decideMatching}
+              profileName={data.profile?.name}
+              sentMatchings={data.sentMatchings}
+            />
           )}
           {tab === "admin" && <AdminSpacesPanel />}
         </div>
