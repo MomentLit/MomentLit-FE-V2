@@ -645,8 +645,10 @@ export const apiClient = axios.create({
 ```
 
 브라우저에서는 `NEXT_PUBLIC_API_BASE_URL=/api`를 사용하고, Next.js rewrite가
-`API_BASE_URL`에 설정된 백엔드 주소로 요청을 프록시한다. 이를 통해 로컬 개발과
-배포 환경에서 동일 출처 정책을 유지한다.
+`API_BASE_URL`에 설정된 백엔드 주소로 요청을 프록시한다. 이미지 업로드처럼
+별도 서버를 사용하는 API는 `NEXT_PUBLIC_IMAGE_API_BASE_URL=/image-api`와
+`IMAGE_API_BASE_URL` rewrite를 사용한다. 이를 통해 로컬 개발과 배포 환경에서
+동일 출처 정책을 유지한다.
 
 ### 도메인 API 파일
 

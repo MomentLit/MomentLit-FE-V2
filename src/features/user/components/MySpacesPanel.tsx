@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useState } from "react";
 
 import MarkerIcon from "@/components/ui/MarkerIcon";
 import type { MatchingListSearchResponse } from "@/types/matching";
@@ -12,6 +13,7 @@ type MySpacesPanelProps = {
   matchings: MatchingListSearchResponse[];
   isLoading: boolean;
   error?: string | null;
+  onDeleteSpace: (spaceId: number) => Promise<void>;
 };
 
 const formatCount = (value: number) => String(value).padStart(2, "0");
@@ -36,9 +38,27 @@ function EmptyList({ children }: { children: string }) {
   return <p className="rounded-[12px] bg-[#F7F7F7] px-[20px] py-[32px] text-center text-[14px] text-[#67728A]">{children}</p>;
 }
 
-export default function MySpacesPanel({ spaces, popups, matchings, isLoading, error }: MySpacesPanelProps) {
-  const activeSpaces = spaces.filter((space) => space.is_active && space.admin_status === "APPROVED").length;
+export default function MySpacesPanel({ spaces, popups, matchings, isLoading, error, onDeleteSpace }: MySpacesPanelProps) {
+  const [deletingSpaceId, setDeletingSpaceId] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const activeSpaces = spaces.filter((space) => space.is_active).length;
   const newRequests = matchings.filter((matching) => matching.status === "REQUESTED").length;
+
+  const handleDeleteSpace = async (spaceId: number) => {
+    const confirmed = window.confirm("이 공간을 삭제할까요?");
+    if (!confirmed) return;
+
+    setDeletingSpaceId(spaceId);
+    setDeleteError(null);
+
+    try {
+      await onDeleteSpace(spaceId);
+    } catch {
+      setDeleteError("공간을 삭제하지 못했습니다.");
+    } finally {
+      setDeletingSpaceId(null);
+    }
+  };
 
   return (
     <section className="flex flex-col gap-[24px] rounded-[30px] bg-white p-[28px]">
@@ -64,13 +84,33 @@ export default function MySpacesPanel({ spaces, popups, matchings, isLoading, er
             <h3 className="text-[24px] font-bold text-[#222831]">공간 리스트</h3>
             <div className="flex gap-[12px]">
               <Link className="rounded-[12px] bg-[#00ADB5] px-[14px] py-[10px] text-[12px] font-semibold text-white" href="/spaces/create">새 공간 등록</Link>
-              <button className="rounded-[12px] bg-[#D0D3DB] px-[14px] py-[10px] text-[12px] font-semibold text-[#5E687E]" disabled type="button">공간 관리</button>
             </div>
           </div>
+          {deleteError && <p className="rounded-[12px] bg-[#F7F7F7] px-[16px] py-[12px] text-[13px] font-semibold text-[#DA294A]">{deleteError}</p>}
           {spaces.length === 0 ? <EmptyList>등록된 공간이 없습니다.</EmptyList> : (
             <div className="grid gap-[24px] md:grid-cols-2 xl:grid-cols-3">
               {spaces.map((space) => (
-                <AssetCard address={space.address.road_address} imageUrl={space.thumbnail_url || undefined} key={space.space_id} title={space.name} />
+                <div className="flex min-w-0 flex-col gap-[10px]" key={space.space_id}>
+                  <Link href={`/spaces/${space.space_id}`}>
+                    <AssetCard address={space.address.road_address} imageUrl={space.thumbnail_url || undefined} title={space.name} />
+                  </Link>
+                  <div className="flex gap-[8px]">
+                    <Link
+                      className="flex h-[36px] flex-1 items-center justify-center rounded-[12px] bg-[#00ADB5] text-[12px] font-semibold text-white"
+                      href={`/spaces/${space.space_id}/edit`}
+                    >
+                      수정
+                    </Link>
+                    <button
+                      className="h-[36px] flex-1 rounded-[12px] bg-[#D0D3DB] text-[12px] font-semibold text-[#5E687E] disabled:cursor-not-allowed disabled:opacity-70"
+                      disabled={deletingSpaceId === space.space_id}
+                      onClick={() => void handleDeleteSpace(space.space_id)}
+                      type="button"
+                    >
+                      {deletingSpaceId === space.space_id ? "삭제 중" : "삭제"}
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
           )}

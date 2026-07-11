@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
@@ -16,6 +17,7 @@ type SpaceDetailPageScreenProps = {
 };
 
 export default function SpaceDetailPageScreen({ spaceId }: SpaceDetailPageScreenProps) {
+  const router = useRouter();
   const detail = useSpaceDetail(spaceId);
 
   if (detail.isLoading) {
@@ -48,6 +50,8 @@ export default function SpaceDetailPageScreen({ spaceId }: SpaceDetailPageScreen
   const { space } = detail;
   const galleryImages = [space.thumbnail_url, ...space.image_urls].filter(Boolean);
   const address = [space.address.road_address, space.address.detail_address].filter(Boolean).join(" ");
+  const ownerName = detail.ownerProfile?.name ?? "공간 등록자";
+  const ownerDescription = detail.ownerProfile?.phone ?? detail.ownerProfile?.email ?? "문의 시 상세 정보가 제공됩니다.";
 
   return (
     <div className="min-h-screen bg-[#F8FBFB]">
@@ -106,13 +110,47 @@ export default function SpaceDetailPageScreen({ spaceId }: SpaceDetailPageScreen
                   </div>
                 </dl>
 
+                {detail.isOwner && (
+                  <div className="grid grid-cols-2 gap-[10px]">
+                    <Link
+                      className="flex h-[46px] items-center justify-center rounded-[12px] bg-[#00ADB5] text-[15px] font-bold text-white hover:bg-[#00979E]"
+                      href={`/spaces/${space.space_id}/edit`}
+                    >
+                      수정하기
+                    </Link>
+                    <button
+                      className="h-[46px] rounded-[12px] bg-[#D0D3DB] text-[15px] font-bold text-[#5E687E] disabled:cursor-not-allowed disabled:opacity-70"
+                      disabled={detail.isDeleting}
+                      onClick={async () => {
+                        const confirmed = window.confirm("이 공간을 삭제할까요?");
+                        if (!confirmed) return;
+
+                        const deleted = await detail.deleteCurrentSpace();
+                        if (deleted) router.push("/my?tab=spaces");
+                      }}
+                      type="button"
+                    >
+                      {detail.isDeleting ? "삭제 중" : "삭제하기"}
+                    </button>
+                  </div>
+                )}
+
+                {(detail.actionError || detail.actionMessage) && (
+                  <p
+                    className={`rounded-[12px] bg-[#F8FBFB] px-[16px] py-[12px] text-center text-[13px] font-semibold ${detail.actionError ? "text-[#DA294A]" : "text-[#00ADB5]"}`}
+                    role={detail.actionError ? "alert" : "status"}
+                  >
+                    {detail.actionError ?? detail.actionMessage}
+                  </p>
+                )}
+
                 <div className="flex flex-col gap-[10px] rounded-[20px] bg-[#F8FBFB] p-[18px]">
                   <p className="text-[13px] font-bold text-[#67728A]">공간 등록자</p>
                   <div className="flex items-center gap-[12px]">
                     <DefaultProfile className="size-[48px]" />
                     <div className="flex flex-col gap-[4px]">
-                      <p className="text-[16px] font-bold text-[#222831]">공간 등록자</p>
-                      <p className="text-[13px] font-medium text-[#67728A]">문의 시 상세 정보가 제공됩니다.</p>
+                      <p className="text-[16px] font-bold text-[#222831]">{ownerName}</p>
+                      <p className="text-[13px] font-medium text-[#67728A]">{ownerDescription}</p>
                     </div>
                   </div>
                 </div>
@@ -127,12 +165,14 @@ export default function SpaceDetailPageScreen({ spaceId }: SpaceDetailPageScreen
                   selectedDays={detail.scheduleSummary.selectedDays}
                   year={detail.scheduleSummary.year}
                 />
-                <Link
-                  className="flex h-[46px] w-full items-center justify-center rounded-[12px] bg-[#00ADB5] text-[15px] font-bold text-white hover:bg-[#00979E]"
-                  href="/my?tab=matching"
+                <button
+                  className="flex h-[46px] w-full items-center justify-center rounded-[12px] bg-[#00ADB5] text-[15px] font-bold text-white hover:bg-[#00979E] disabled:cursor-not-allowed disabled:opacity-70"
+                  disabled={detail.isOwner || detail.isRequestingMatching}
+                  onClick={() => void detail.requestMatching()}
+                  type="button"
                 >
-                  공간 문의하기
-                </Link>
+                  {detail.isRequestingMatching ? "문의 중" : "공간 문의하기"}
+                </button>
               </section>
             </aside>
           </div>

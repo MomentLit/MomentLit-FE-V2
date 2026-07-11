@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 
@@ -8,11 +11,24 @@ import HeroCarousel from "./HeroCarousel";
 import SpaceSection from "./SpaceSection";
 
 export default function MainPageScreen() {
+  const router = useRouter();
   const { data, error, isLoading } = useMainPage();
+  const [searchValue, setSearchValue] = useState("");
+
+  const submitSearch = () => {
+    const keyword = searchValue.trim();
+    router.push(keyword ? `/search?name=${encodeURIComponent(keyword)}` : "/search");
+  };
 
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
-      <Header type="top" />
+      <Header
+        activeNav="home"
+        onSearch={submitSearch}
+        onSearchValueChange={setSearchValue}
+        searchValue={searchValue}
+        type="top"
+      />
       <main>
         <HeroCarousel items={data.heroes} />
         {isLoading && <p className="py-[80px] text-center text-[#67728A]">공간 정보를 불러오는 중입니다.</p>}

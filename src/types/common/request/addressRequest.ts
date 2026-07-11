@@ -6,6 +6,4 @@ export type AddressRequest = {
   jibun_address?: string;
   detail_address?: string;
   postal_code?: string;
-  lat?: number;
-  lng?: number;
 };

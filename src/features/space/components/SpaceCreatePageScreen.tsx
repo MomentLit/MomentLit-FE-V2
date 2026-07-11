@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import Button from "@/components/common/Button";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
@@ -10,8 +12,38 @@ import SpaceImageGallery from "./SpaceImageGallery";
 
 const fieldClassName = "min-h-[43px] w-full rounded-[12px] bg-[#F7F7F7] px-[14px] py-[12px] text-[16px] font-medium text-[#222831] outline-none placeholder:text-[#67728A] focus:ring-2 focus:ring-[#00ADB5]/30";
 
+const parseDateInput = (value: string) => {
+  if (!value) return null;
+
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 export default function SpaceCreatePageScreen() {
   const spaceForm = useCreateSpace();
+  const calendar = useMemo(() => {
+    const today = new Date();
+    const startDate = parseDateInput(spaceForm.form.startDate);
+    const endDate = parseDateInput(spaceForm.form.endDate);
+    const baseDate = startDate ?? endDate ?? today;
+    const year = baseDate.getFullYear();
+    const month = baseDate.getMonth() + 1;
+    const selectedDays: number[] = [];
+
+    if (startDate && startDate.getFullYear() === year && startDate.getMonth() + 1 === month) {
+      const rangeEnd = endDate && endDate >= startDate ? endDate : startDate;
+      const lastDay = new Date(year, month, 0).getDate();
+      const endDay = rangeEnd.getFullYear() === year && rangeEnd.getMonth() + 1 === month
+        ? rangeEnd.getDate()
+        : lastDay;
+
+      for (let day = startDate.getDate(); day <= endDay; day += 1) {
+        selectedDays.push(day);
+      }
+    }
+
+    return { month, selectedDays, year };
+  }, [spaceForm.form.endDate, spaceForm.form.startDate]);
 
   return (
     <div className="min-h-screen bg-[#F8FBFB]">
@@ -89,7 +121,12 @@ export default function SpaceCreatePageScreen() {
                 </div>
               </fieldset>
 
-              <CalendarBox className="max-w-full self-center" />
+              <CalendarBox
+                className="max-w-full self-center"
+                month={calendar.month}
+                selectedDays={calendar.selectedDays}
+                year={calendar.year}
+              />
 
               <fieldset className="flex flex-col gap-[4px]">
                 <legend className="mb-[4px] text-[16px] font-medium text-[#222831]">주소</legend>
@@ -135,11 +172,11 @@ export default function SpaceCreatePageScreen() {
                     value={spaceForm.form.category}
                   >
                     <option value="">카테고리 선택</option>
-                    <option value="카페">카페</option>
-                    <option value="쇼룸">쇼룸</option>
-                    <option value="스튜디오">스튜디오</option>
-                    <option value="연습실">연습실</option>
-                    <option value="기타">기타</option>
+                    <option value="CAFE">카페</option>
+                    <option value="POPUP_STORE">쇼룸</option>
+                    <option value="STUDIO">스튜디오</option>
+                    <option value="PRACTICE_ROOM">연습실</option>
+                    <option value="OTHER">기타</option>
                   </select>
                   <span className="pointer-events-none absolute right-[14px] top-1/2 -translate-y-1/2 rotate-90 text-[#67728A]">›</span>
                 </span>

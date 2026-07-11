@@ -11,8 +11,8 @@ type FooterProps = {
 };
 
 export default function Footer({ variant = "landing", className }: FooterProps) {
-  const navItems = variant === "mainPage" ? ["홈", "공간 찾기", "캘린더", "AI 공간 매칭"] : ["메인", "솔루션", "서비스", "소개"];
-  const navHrefs = variant === "mainPage" ? ["/main", "/search", "#", "#"] : ["#", "#", "#", "#"];
+  const navItems = variant === "mainPage" ? ["홈", "공간 찾기", "AI 공간 매칭"] : ["메인", "솔루션", "서비스", "소개"];
+  const navHrefs = variant === "mainPage" ? ["/main", "/search", "#"] : ["#", "#", "#", "#"];
 
   return (
     <footer className={cn("min-h-[400px] w-full border-t border-[#D0D3DB]", variant === "mainPage" ? "bg-[#F8FBFB]" : "bg-[#FFFFFF]", className)}>

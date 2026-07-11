@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import Pagination from "@/components/common/Pagination";
@@ -34,13 +36,14 @@ export default function SearchPageScreen() {
         {!search.isLoading && !search.error && search.visibleSpaces.length > 0 && (
           <div className="grid gap-x-[32px] gap-y-[64px] sm:grid-cols-2 xl:grid-cols-4 xl:justify-between">
             {search.visibleSpaces.map((space) => (
-              <SpaceCard
-                address={space.address.road_address || space.address.jibun_address}
-                imageUrl={space.thumbnail_url || undefined}
-                key={space.space_id}
-                price={`${space.price_per_hour.toLocaleString("ko-KR")}원`}
-                title={space.name}
-              />
+              <Link href={`/spaces/${space.space_id}`} key={space.space_id}>
+                <SpaceCard
+                  address={space.address.road_address || space.address.jibun_address}
+                  imageUrl={space.thumbnail_url || undefined}
+                  price={`${space.price_per_hour.toLocaleString("ko-KR")}원`}
+                  title={space.name}
+                />
+              </Link>
             ))}
           </div>
         )}
