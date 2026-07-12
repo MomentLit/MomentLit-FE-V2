@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
+
 import Button from "@/components/common/Button";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
+import { useAddressSearch } from "@/hooks/useAddressSearch";
 
 import { useEditSpace } from "../hooks/useEditSpace";
 import SpaceImageGallery from "./SpaceImageGallery";
@@ -15,9 +18,21 @@ type SpaceEditPageScreenProps = {
 
 export default function SpaceEditPageScreen({ spaceId }: SpaceEditPageScreenProps) {
   const spaceForm = useEditSpace(spaceId);
+  const addressSearch = useAddressSearch();
+  const [addressError, setAddressError] = useState<string | null>(null);
   const galleryImages = spaceForm.space
     ? [spaceForm.space.thumbnail_url, ...spaceForm.space.image_urls].filter(Boolean)
     : [];
+
+  const handleAddressSearch = () => {
+    void addressSearch.open(
+      (result) => {
+        setAddressError(null);
+        spaceForm.setAddress(result);
+      },
+      (message) => setAddressError(message),
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FBFB]">
@@ -82,17 +97,26 @@ export default function SpaceEditPageScreen({ spaceId }: SpaceEditPageScreenProp
 
                 <fieldset className="flex flex-col gap-[4px]">
                   <legend className="mb-[4px] text-[16px] font-medium text-[#222831]">주소</legend>
+                  <div className="flex gap-[4px]">
+                    <input
+                      aria-label="우편 번호"
+                      className={fieldClassName}
+                      placeholder="우편 번호"
+                      readOnly
+                      value={spaceForm.form.postalCode}
+                    />
+                    <button
+                      className="h-[43px] w-[146px] shrink-0 rounded-[12px] bg-[#00ADB5] text-[16px] font-bold text-white hover:bg-[#00979E]"
+                      onClick={handleAddressSearch}
+                      type="button"
+                    >
+                      주소 검색
+                    </button>
+                  </div>
                   <input
-                    aria-label="우편 번호"
                     className={fieldClassName}
-                    onChange={(event) => spaceForm.setField("postalCode", event.target.value)}
-                    placeholder="우편 번호"
-                    value={spaceForm.form.postalCode}
-                  />
-                  <input
-                    className={fieldClassName}
-                    onChange={(event) => spaceForm.setField("roadAddress", event.target.value)}
-                    placeholder="도로명 주소"
+                    placeholder="주소 검색을 통해 입력해주세요"
+                    readOnly
                     required
                     value={spaceForm.form.roadAddress}
                   />
@@ -102,6 +126,9 @@ export default function SpaceEditPageScreen({ spaceId }: SpaceEditPageScreenProp
                     placeholder="상세 주소"
                     value={spaceForm.form.detailAddress}
                   />
+                  {addressError && (
+                    <p className="text-[13px] font-semibold text-[#DA294A]">{addressError}</p>
+                  )}
                 </fieldset>
 
                 <label className="flex flex-col gap-[4px] text-[16px] font-medium text-[#222831]">

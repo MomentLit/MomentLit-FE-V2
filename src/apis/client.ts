@@ -38,46 +38,66 @@ apiClient.interceptors.request.use((config) => {
 
 let refreshPromise: Promise<string> | null = null;
 
+const forceLogout = (): void => {
+  clearAuthTokens();
+  if (typeof window === "undefined") return;
+  if (window.location.pathname !== "/login") {
+    window.location.href = "/login";
+  }
+};
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
     if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      typeof window !== "undefined"
+      error.response?.status !== 401 ||
+      typeof window === "undefined" ||
+      isPublicEndpoint(originalRequest?.url)
     ) {
-      originalRequest._retry = true;
-      const refreshToken = getRefreshToken();
-
-      if (refreshToken) {
-        try {
-          if (!refreshPromise) {
-            refreshPromise = axios
-              .post(`${API_BASE_URL}/auth/refresh`, {
-                refresh_token: refreshToken,
-              })
-              .then((res) => {
-                const newAccessToken = res.data.data.access_token;
-                const newRefreshToken = res.data.data.refresh_token;
-                setAuthTokens(newAccessToken, newRefreshToken);
-                return newAccessToken;
-              })
-              .finally(() => {
-                refreshPromise = null;
-              });
-          }
-
-          const newAccessToken = await refreshPromise;
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          return apiClient(originalRequest);
-        } catch {
-          clearAuthTokens();
-        }
-      }
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    // Access token was already refreshed once for this request and still
+    // got a 401 back — the session is truly expired, log the user out.
+    if (originalRequest._retry) {
+      forceLogout();
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+    const refreshToken = getRefreshToken();
+
+    if (!refreshToken) {
+      forceLogout();
+      return Promise.reject(error);
+    }
+
+    try {
+      if (!refreshPromise) {
+        refreshPromise = axios
+          .post(`${API_BASE_URL}/auth/refresh`, {
+            refresh_token: refreshToken,
+          })
+          .then((res) => {
+            const newAccessToken = res.data.data.access_token;
+            const newRefreshToken = res.data.data.refresh_token;
+            setAuthTokens(newAccessToken, newRefreshToken);
+            return newAccessToken;
+          })
+          .finally(() => {
+            refreshPromise = null;
+          });
+      }
+
+      const newAccessToken = await refreshPromise;
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      return apiClient(originalRequest);
+    } catch {
+      // Refresh token itself is invalid/expired — log the user out.
+      forceLogout();
+      return Promise.reject(error);
+    }
   }
 );

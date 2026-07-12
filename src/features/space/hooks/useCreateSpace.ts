@@ -4,6 +4,7 @@ import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { AddressSearchResult } from "@/hooks/useAddressSearch";
 import { uploadImage } from "@/apis/image";
 import { createSchedule } from "@/apis/schedule";
 import { createSpace } from "@/apis/space";
@@ -18,6 +19,10 @@ export type SpaceCreateForm = {
   endDate: string;
   postalCode: string;
   roadAddress: string;
+  jibunAddress: string;
+  sido: string;
+  sigungu: string;
+  eupMyeonDong: string;
   detailAddress: string;
   category: string;
 };
@@ -30,6 +35,10 @@ const initialForm: SpaceCreateForm = {
   endDate: "",
   postalCode: "",
   roadAddress: "",
+  jibunAddress: "",
+  sido: "",
+  sigungu: "",
+  eupMyeonDong: "",
   detailAddress: "",
   category: "",
 };
@@ -41,20 +50,15 @@ const readFileAsDataUrl = (file: File) => new Promise<string>((resolve, reject) 
   reader.readAsDataURL(file);
 });
 
-const splitRoadAddress = (roadAddress: string) => {
-  const [sido = "", sigungu = "", eupMyeonDong = ""] = roadAddress.trim().split(/\s+/);
-  return { eupMyeonDong, sido, sigungu };
-};
-
 const buildAddressRequest = (form: SpaceCreateForm): AddressRequest => {
-  const { eupMyeonDong, sido, sigungu } = splitRoadAddress(form.roadAddress);
   const address: AddressRequest = {
-    sido,
-    sigungu,
+    sido: form.sido.trim(),
+    sigungu: form.sigungu.trim(),
     road_address: form.roadAddress.trim(),
   };
 
-  if (eupMyeonDong) address.eup_myeon_dong = eupMyeonDong;
+  if (form.eupMyeonDong.trim()) address.eup_myeon_dong = form.eupMyeonDong.trim();
+  if (form.jibunAddress.trim()) address.jibun_address = form.jibunAddress.trim();
   if (form.detailAddress.trim()) address.detail_address = form.detailAddress.trim();
   if (form.postalCode.trim()) address.postal_code = form.postalCode.trim();
 
@@ -126,6 +130,18 @@ export function useCreateSpace() {
 
   const setField = useCallback(<K extends keyof SpaceCreateForm>(key: K, value: SpaceCreateForm[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
+  }, []);
+
+  const setAddress = useCallback((result: AddressSearchResult) => {
+    setForm((current) => ({
+      ...current,
+      eupMyeonDong: result.eupMyeonDong,
+      jibunAddress: result.jibunAddress,
+      postalCode: result.postalCode,
+      roadAddress: result.roadAddress,
+      sido: result.sido,
+      sigungu: result.sigungu,
+    }));
   }, []);
 
   const addImages = useCallback(async (files: FileList | null) => {
@@ -236,6 +252,7 @@ export function useCreateSpace() {
     imageUrls,
     isSubmitting,
     removeImage,
+    setAddress,
     setField,
     submit,
   };

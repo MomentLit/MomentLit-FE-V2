@@ -4,6 +4,7 @@ import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { AddressSearchResult } from "@/hooks/useAddressSearch";
 import { getMySpaces, getSpaceDetail, updateSpace } from "@/apis/space";
 import type { AddressRequest } from "@/types/common";
 import type { SpaceDetailSearchResponse } from "@/types/space";
@@ -14,6 +15,10 @@ export type SpaceEditForm = {
   pricePerHour: string;
   postalCode: string;
   roadAddress: string;
+  jibunAddress: string;
+  sido: string;
+  sigungu: string;
+  eupMyeonDong: string;
   detailAddress: string;
   category: string;
 };
@@ -24,6 +29,10 @@ const initialForm: SpaceEditForm = {
   pricePerHour: "",
   postalCode: "",
   roadAddress: "",
+  jibunAddress: "",
+  sido: "",
+  sigungu: "",
+  eupMyeonDong: "",
   detailAddress: "",
   category: "",
 };
@@ -32,21 +41,30 @@ const toForm = (space: SpaceDetailSearchResponse): SpaceEditForm => ({
   category: space.category ?? "",
   description: space.description ?? "",
   detailAddress: space.address.detail_address ?? "",
+  eupMyeonDong: space.address.eup_myeon_dong ?? "",
+  jibunAddress: space.address.jibun_address ?? "",
   name: space.name ?? "",
   postalCode: space.address.postal_code ?? "",
   pricePerHour: String(space.price_per_hour ?? ""),
   roadAddress: space.address.road_address ?? "",
+  sido: space.address.sido ?? "",
+  sigungu: space.address.sigungu ?? "",
 });
 
-const buildAddressRequest = (space: SpaceDetailSearchResponse, form: SpaceEditForm): AddressRequest => ({
-  detail_address: form.detailAddress.trim() || undefined,
-  eup_myeon_dong: space.address.eup_myeon_dong || undefined,
-  jibun_address: space.address.jibun_address || undefined,
-  postal_code: form.postalCode.trim() || undefined,
-  road_address: form.roadAddress.trim(),
-  sido: space.address.sido,
-  sigungu: space.address.sigungu,
-});
+const buildAddressRequest = (form: SpaceEditForm): AddressRequest => {
+  const address: AddressRequest = {
+    road_address: form.roadAddress.trim(),
+    sido: form.sido.trim(),
+    sigungu: form.sigungu.trim(),
+  };
+
+  if (form.eupMyeonDong.trim()) address.eup_myeon_dong = form.eupMyeonDong.trim();
+  if (form.jibunAddress.trim()) address.jibun_address = form.jibunAddress.trim();
+  if (form.detailAddress.trim()) address.detail_address = form.detailAddress.trim();
+  if (form.postalCode.trim()) address.postal_code = form.postalCode.trim();
+
+  return address;
+};
 
 const isOwnedSpace = async (spaceId: number) => {
   const response = await getMySpaces();
@@ -100,6 +118,18 @@ export function useEditSpace(spaceId: number) {
     setForm((current) => ({ ...current, [key]: value }));
   }, []);
 
+  const setAddress = useCallback((result: AddressSearchResult) => {
+    setForm((current) => ({
+      ...current,
+      eupMyeonDong: result.eupMyeonDong,
+      jibunAddress: result.jibunAddress,
+      postalCode: result.postalCode,
+      roadAddress: result.roadAddress,
+      sido: result.sido,
+      sigungu: result.sigungu,
+    }));
+  }, []);
+
   const submit = useCallback(async () => {
     if (!space || isSubmitting) return;
 
@@ -114,7 +144,7 @@ export function useEditSpace(spaceId: number) {
 
     try {
       await updateSpace(spaceId, {
-        address: buildAddressRequest(space, form),
+        address: buildAddressRequest(form),
         category: form.category,
         description: form.description.trim() || null,
         image_urls: space.image_urls,
@@ -138,6 +168,7 @@ export function useEditSpace(spaceId: number) {
     form,
     isLoading,
     isSubmitting,
+    setAddress,
     setField,
     space,
     submit,
