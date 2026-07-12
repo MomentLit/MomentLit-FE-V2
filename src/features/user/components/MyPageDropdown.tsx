@@ -28,12 +28,15 @@ export default function MyPageDropdown({
 }: MyPageDropdownProps) {
   const name = profile?.name ?? (isLoading ? "불러오는 중" : "사용자");
   const email = profile?.email ?? (error || "프로필 정보를 확인해주세요.");
+  const items = profile?.role === "ADMIN"
+    ? [...menuItems, { href: "/my?tab=admin", label: "공간 승인 및 거부" }]
+    : menuItems;
 
   return (
     <section
       aria-label="마이페이지 메뉴"
       className={cn(
-        "flex h-[341px] w-[320px] flex-col gap-[12px] overflow-hidden rounded-[20px] border border-[#D0D3DB] bg-white p-[16px]",
+        "flex w-[320px] flex-col gap-[12px] rounded-[20px] border border-[#D0D3DB] bg-white p-[16px]",
         className,
       )}
     >
@@ -55,7 +58,7 @@ export default function MyPageDropdown({
         </span>
       </Link>
 
-      {menuItems.map((item) => (
+      {items.map((item) => (
         <Link
           className="flex h-[44px] shrink-0 items-center rounded-[12px] bg-[#F7F7F7] px-[20px] text-[16px] font-semibold text-[#5E687E] transition-colors hover:bg-[#EEEEEE] hover:text-[#00ADB5]"
           href={item.href}

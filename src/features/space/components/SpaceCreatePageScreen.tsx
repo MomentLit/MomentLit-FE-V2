@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import Button from "@/components/common/Button";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import CalendarBox from "@/components/ui/CalendarBox";
+import { useAddressSearch } from "@/hooks/useAddressSearch";
 
 import { useCreateSpace } from "../hooks/useCreateSpace";
 import SpaceImageGallery from "./SpaceImageGallery";
@@ -21,6 +22,19 @@ const parseDateInput = (value: string) => {
 
 export default function SpaceCreatePageScreen() {
   const spaceForm = useCreateSpace();
+  const addressSearch = useAddressSearch();
+  const [addressError, setAddressError] = useState<string | null>(null);
+
+  const handleAddressSearch = () => {
+    void addressSearch.open(
+      (result) => {
+        setAddressError(null);
+        spaceForm.setAddress(result);
+      },
+      (message) => setAddressError(message),
+    );
+  };
+
   const calendar = useMemo(() => {
     const today = new Date();
     const startDate = parseDateInput(spaceForm.form.startDate);
@@ -134,23 +148,23 @@ export default function SpaceCreatePageScreen() {
                   <input
                     aria-label="우편 번호"
                     className={fieldClassName}
-                    onChange={(event) => spaceForm.setField("postalCode", event.target.value)}
                     placeholder="우편 번호"
+                    readOnly
                     value={spaceForm.form.postalCode}
                   />
                   <button
                     className="h-[43px] w-[146px] shrink-0 rounded-[12px] bg-[#00ADB5] text-[16px] font-bold text-white hover:bg-[#00979E]"
-                    onClick={() => document.getElementById("space-road-address")?.focus()}
+                    onClick={handleAddressSearch}
                     type="button"
                   >
-                    주소 입력
+                    주소 검색
                   </button>
                 </div>
                 <input
                   className={fieldClassName}
                   id="space-road-address"
-                  onChange={(event) => spaceForm.setField("roadAddress", event.target.value)}
-                  placeholder="도로명 주소"
+                  placeholder="주소 검색을 통해 입력해주세요"
+                  readOnly
                   required
                   value={spaceForm.form.roadAddress}
                 />
@@ -160,6 +174,9 @@ export default function SpaceCreatePageScreen() {
                   placeholder="상세 주소"
                   value={spaceForm.form.detailAddress}
                 />
+                {addressError && (
+                  <p className="text-[13px] font-semibold text-[#DA294A]">{addressError}</p>
+                )}
               </fieldset>
 
               <label className="flex flex-col gap-[4px] text-[16px] font-medium text-[#222831]">
