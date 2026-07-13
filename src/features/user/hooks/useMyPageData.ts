@@ -35,7 +35,7 @@ const enrichMatchingsWithSpaceName = async (
   const spaceIds = Array.from(
     new Set(
       matchings
-        .map((matching) => getMatchingSpaceId(matching))
+        .map((matching) => matching.space_id)
         .filter((spaceId): spaceId is number => typeof spaceId === "number"),
     ),
   );
@@ -54,26 +54,8 @@ const enrichMatchingsWithSpaceName = async (
 
   return matchings.map((matching) => ({
     ...matching,
-    space_name: matching.space_name ?? (getMatchingSpaceId(matching) ? spaceNameMap.get(getMatchingSpaceId(matching) as number) : undefined),
+    space_name: matching.space_name ?? (matching.space_id ? spaceNameMap.get(matching.space_id) : undefined),
   }));
-};
-
-type MatchingWithSpaceFields = MatchingListSearchResponse & {
-  space?: {
-    id?: number;
-    space_id?: number;
-  };
-  spaceId?: number;
-};
-
-const getMatchingSpaceId = (matching?: MatchingListSearchResponse): number | undefined => {
-  if (!matching) return undefined;
-
-  const candidate = matching as MatchingWithSpaceFields;
-  return candidate.space_id
-    ?? candidate.spaceId
-    ?? candidate.space?.space_id
-    ?? candidate.space?.id;
 };
 
 export function useMyPageData(tab: MyPageTab) {
@@ -87,7 +69,6 @@ export function useMyPageData(tab: MyPageTab) {
     profileError,
   } = useMyPageMenu();
   const [spaces, setSpaces] = useState<MySpaceListSearchResponse[]>([]);
-  const [adminMatchings, setAdminMatchings] = useState<MatchingListSearchResponse[]>([]);
   const [popups, setPopups] = useState<MyPopupItem[]>([]);
   const [matchings, setMatchings] = useState<MatchingListSearchResponse[]>([]);
   const [sentMatchings, setSentMatchings] = useState<MatchingListSearchResponse[]>([]);
@@ -109,8 +90,7 @@ export function useMyPageData(tab: MyPageTab) {
   }, [profile, router, tab]);
 
   useEffect(() => {
-    if (!getAccessToken() || tab === "profile") return;
-    if (tab === "admin" && profile?.role !== "ADMIN") return;
+    if (!getAccessToken() || tab === "profile" || tab === "admin") return;
 
     let isActive = true;
 
@@ -119,16 +99,6 @@ export function useMyPageData(tab: MyPageTab) {
       setContentError(null);
 
       try {
-        if (tab === "admin") {
-          const response = await getReceivedMatchings();
-          const nextMatchings = await enrichMatchingsWithSpaceName(response.data.matchings);
-
-          if (isActive) {
-            setAdminMatchings(nextMatchings);
-          }
-          return;
-        }
-
         if (tab === "matching") {
           const [receivedResponse, sentResponse] = await Promise.all([
             getReceivedMatchings(),
@@ -182,7 +152,7 @@ export function useMyPageData(tab: MyPageTab) {
     return () => {
       isActive = false;
     };
-  }, [profile?.role, tab]);
+  }, [tab]);
 
   const saveProfile = useCallback(async (body: UserUpdateRequest) => {
     await updateMyProfile(body);
@@ -215,31 +185,8 @@ export function useMyPageData(tab: MyPageTab) {
     setSpaces((current) => current.filter((space) => space.space_id !== spaceId));
   }, []);
 
-  const decideAdminSpace = useCallback(async (
-    matchingId: number,
-    decision: "approve" | "reject",
-  ) => {
-    try {
-      if (decision === "approve") await approveMatching(matchingId);
-      else await rejectMatching(matchingId);
-    } catch (requestError) {
-      const message = axios.isAxiosError<{ message?: string }>(requestError)
-        ? requestError.response?.data?.message
-        : undefined;
-      throw new Error(message ?? "매칭 요청을 처리하지 못했습니다.");
-    }
-
-    setAdminMatchings((current) => current.map((matching) =>
-      matching.matching_id === matchingId
-        ? { ...matching, status: decision === "approve" ? "APPROVED" : "REJECTED" }
-        : matching,
-    ));
-  }, []);
-
   return {
-    adminMatchings,
     contentError,
-    decideAdminSpace,
     decideMatching,
     handleSignOut,
     isContentLoading,

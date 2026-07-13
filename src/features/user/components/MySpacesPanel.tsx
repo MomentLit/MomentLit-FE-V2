@@ -43,10 +43,6 @@ export default function MySpacesPanel({ spaces, popups, matchings, isLoading, er
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const activeSpaces = spaces.filter((space) => space.is_active).length;
   const newRequests = matchings.filter((matching) => matching.status === "REQUESTED").length;
-  const approvedMatching = matchings.find((matching) => matching.status === "APPROVED");
-  const popupCreateHref = approvedMatching
-    ? `/popups/create?matchingId=${approvedMatching.matching_id}`
-    : "/popups/create";
 
   const handleDeleteSpace = async (spaceId: number) => {
     const confirmed = window.confirm("이 공간을 삭제할까요?");
@@ -122,12 +118,7 @@ export default function MySpacesPanel({ spaces, popups, matchings, isLoading, er
           <div className="flex items-center justify-between pt-[8px]">
             <h3 className="text-[24px] font-bold text-[#222831]">팝업 리스트</h3>
             <div className="flex gap-[12px]">
-              <Link
-                className="rounded-[12px] bg-[#00ADB5] px-[14px] py-[10px] text-[12px] font-semibold text-white"
-                href={popupCreateHref}
-              >
-                새 팝업 등록
-              </Link>
+              <button className="rounded-[12px] bg-[#D0D3DB] px-[14px] py-[10px] text-[12px] font-semibold text-[#5E687E]" disabled type="button">새 팝업 등록</button>
               <button className="rounded-[12px] bg-[#D0D3DB] px-[14px] py-[10px] text-[12px] font-semibold text-[#5E687E]" disabled type="button">팝업 관리</button>
             </div>
           </div>
