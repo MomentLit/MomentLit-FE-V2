@@ -66,7 +66,14 @@ export default function MyPageScreen({ tab }: MyPageScreenProps) {
               sentMatchings={data.sentMatchings}
             />
           )}
-          {tab === "admin" && <AdminSpacesPanel />}
+          {tab === "admin" && (
+            <AdminSpacesPanel
+              error={data.contentError}
+              isLoading={data.isContentLoading}
+              onDecision={data.decideAdminSpace}
+              matchings={data.adminMatchings}
+            />
+          )}
         </div>
       </main>
       <Footer className="mt-[64px]" variant="mainPage" />
