@@ -170,7 +170,10 @@ export default function SpaceDetailPageScreen({ spaceId }: SpaceDetailPageScreen
                   disabled={detail.isOwner || detail.isRequestingMatching}
                   onClick={async () => {
                     const matchingId = await detail.requestMatching();
-                    if (matchingId) router.push(`/chat?matchingId=${matchingId}`);
+                    if (!matchingId) return;
+
+                    const chatRoomId = await detail.startChat();
+                    if (chatRoomId) router.push(`/chat?chatRoomId=${chatRoomId}`);
                   }}
                   type="button"
                 >

@@ -5,32 +5,38 @@ import { useMemo, useState } from "react";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 
+import { useChatMessages } from "../hooks/useChatMessages";
 import { useChatRooms } from "../hooks/useChatRooms";
-import { useChatThread } from "../hooks/useChatThread";
 import ChatRoomList from "./ChatRoomList";
 import ChatThread from "./ChatThread";
 
 type ChatPageScreenProps = {
-  initialMatchingId?: number;
+  initialChatRoomId?: number;
 };
 
-export default function ChatPageScreen({ initialMatchingId }: ChatPageScreenProps) {
+export default function ChatPageScreen({ initialChatRoomId }: ChatPageScreenProps) {
   const { rooms, isLoading, error } = useChatRooms();
-  const [selectedMatchingId, setSelectedMatchingId] = useState<number | null>(initialMatchingId ?? null);
+  const [selectedChatRoomId, setSelectedChatRoomId] = useState<number | null>(initialChatRoomId ?? null);
   const [syncedRooms, setSyncedRooms] = useState(rooms);
 
   if (rooms !== syncedRooms) {
     setSyncedRooms(rooms);
-    if (rooms.length > 0 && !rooms.some((room) => room.matchingId === selectedMatchingId)) {
-      setSelectedMatchingId(rooms[0].matchingId);
+    if (rooms.length > 0 && !rooms.some((room) => room.chatRoomId === selectedChatRoomId)) {
+      setSelectedChatRoomId(rooms[0].chatRoomId);
     }
   }
 
   const selectedRoom = useMemo(
-    () => rooms.find((room) => room.matchingId === selectedMatchingId) ?? null,
-    [rooms, selectedMatchingId],
+    () => rooms.find((room) => room.chatRoomId === selectedChatRoomId) ?? null,
+    [rooms, selectedChatRoomId],
   );
-  const { messages, sendMessage } = useChatThread(selectedRoom);
+  const {
+    error: messagesError,
+    isConnected,
+    isLoading: isMessagesLoading,
+    messages,
+    sendMessage,
+  } = useChatMessages(selectedRoom);
 
   return (
     <div className="min-h-screen bg-[#F8FBFB]">
@@ -39,11 +45,18 @@ export default function ChatPageScreen({ initialMatchingId }: ChatPageScreenProp
         <ChatRoomList
           error={error}
           isLoading={isLoading}
-          onSelect={setSelectedMatchingId}
+          onSelect={setSelectedChatRoomId}
           rooms={rooms}
-          selectedMatchingId={selectedMatchingId}
+          selectedChatRoomId={selectedChatRoomId}
         />
-        <ChatThread messages={messages} onSend={sendMessage} room={selectedRoom} />
+        <ChatThread
+          error={messagesError}
+          isConnected={isConnected}
+          isLoading={isMessagesLoading}
+          messages={messages}
+          onSend={sendMessage}
+          room={selectedRoom}
+        />
       </main>
       <Footer className="mt-[32px]" variant="mainPage" />
     </div>

@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AUTH_CHANGE_EVENT, getAccessToken } from "@/apis/auth/tokenStorage";
 import Button from "@/components/common/Button";
 import FilterChip from "@/components/common/FilterChip";
+import { useChatNotifications } from "@/features/chat/hooks/useChatNotifications";
 import MyPageDropdown from "@/features/user/components/MyPageDropdown";
 import { useMyPageMenu } from "@/features/user/hooks/useMyPageMenu";
 import { cn } from "@/utils/cn";
@@ -88,6 +89,10 @@ export default function Header({
     profile,
     profileError,
   } = useMyPageMenu();
+  const chatNotifications = useChatNotifications();
+  const resolvedMessages = messages.length > 0 ? messages : chatNotifications.messages;
+  const resolvedMessageError = messages.length > 0 ? messageError : chatNotifications.error;
+  const resolvedMessagesLoading = messages.length > 0 ? messagesLoading : chatNotifications.isLoading;
   const isAuthenticated = useSyncExternalStore(
     subscribeToAuth,
     getAuthSnapshot,
@@ -190,14 +195,14 @@ export default function Header({
                   onClick={() => setActiveDropdown((current) => current === "message" ? null : "message")}
                   type="button"
                 >
-                  <MessageIcon alert={messages.some((item) => item.unread)} className="size-[32px]" />
+                  <MessageIcon alert={resolvedMessages.some((item) => item.unread)} className="size-[32px]" />
                 </button>
                 {activeDropdown === "message" && (
                   <MessageDropdown
                     className="absolute right-0 top-[36px] z-50 shadow-[0_8px_24px_rgba(34,40,49,0.12)]"
-                    error={messageError}
-                    isLoading={messagesLoading}
-                    items={messages}
+                    error={resolvedMessageError}
+                    isLoading={resolvedMessagesLoading}
+                    items={resolvedMessages}
                   />
                 )}
               </div>

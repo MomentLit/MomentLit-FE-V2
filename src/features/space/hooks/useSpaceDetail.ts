@@ -4,6 +4,7 @@ import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { getAccessToken } from "@/apis/auth/tokenStorage";
+import { createChatRoom } from "@/apis/chat";
 import { createMatching } from "@/apis/matching";
 import { getSchedules } from "@/apis/schedule";
 import { deleteSpace, getMySpaces, getSpaceDetail, getSpaces } from "@/apis/space";
@@ -21,6 +22,7 @@ export function useSpaceDetail(spaceId: number) {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRequestingMatching, setIsRequestingMatching] = useState(false);
+  const [isStartingChat, setIsStartingChat] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -155,6 +157,26 @@ export function useSpaceDetail(spaceId: number) {
     }
   }, [isOwner, isRequestingMatching, schedules, space]);
 
+  const startChat = useCallback(async () => {
+    if (!space || isOwner || isStartingChat) return null;
+
+    setIsStartingChat(true);
+    setActionError(null);
+
+    try {
+      const response = await createChatRoom({ space_id: space.space_id });
+      return response.data.chat_room_id;
+    } catch (requestError) {
+      const message = axios.isAxiosError<{ message?: string }>(requestError)
+        ? requestError.response?.data?.message
+        : undefined;
+      setActionError(message ?? "채팅방을 여는데 실패했습니다.");
+      return null;
+    } finally {
+      setIsStartingChat(false);
+    }
+  }, [isOwner, isStartingChat, space]);
+
   const scheduleSummary = useMemo(() => {
     const dates = schedules
       .map((schedule) => new Date(`${schedule.date}T00:00:00`))
@@ -184,10 +206,12 @@ export function useSpaceDetail(spaceId: number) {
     isLoading,
     isOwner,
     isRequestingMatching,
+    isStartingChat,
     ownerProfile,
     relatedSpaces,
     requestMatching,
     scheduleSummary,
     space,
+    startChat,
   };
 }

@@ -1,15 +1,15 @@
 import ChatPageScreen from "@/features/chat/components/ChatPageScreen";
 
 type ChatPageProps = {
-  searchParams: Promise<{ matchingId?: string }>;
+  searchParams: Promise<{ chatRoomId?: string }>;
 };
 
 export default async function ChatPage({ searchParams }: ChatPageProps) {
-  const { matchingId } = await searchParams;
-  const parsedMatchingId = matchingId ? Number(matchingId) : undefined;
-  const initialMatchingId = parsedMatchingId !== undefined && Number.isFinite(parsedMatchingId)
-    ? parsedMatchingId
+  const { chatRoomId } = await searchParams;
+  const parsedChatRoomId = chatRoomId ? Number(chatRoomId) : undefined;
+  const initialChatRoomId = parsedChatRoomId !== undefined && Number.isFinite(parsedChatRoomId)
+    ? parsedChatRoomId
     : undefined;
 
-  return <ChatPageScreen initialMatchingId={initialMatchingId} />;
+  return <ChatPageScreen initialChatRoomId={initialChatRoomId} />;
 }
