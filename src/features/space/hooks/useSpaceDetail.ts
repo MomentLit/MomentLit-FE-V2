@@ -105,12 +105,12 @@ export function useSpaceDetail(spaceId: number) {
   }, [isDeleting, isOwner, spaceId]);
 
   const requestMatching = useCallback(async () => {
-    if (!space || isOwner || isRequestingMatching) return false;
+    if (!space || isOwner || isRequestingMatching) return null;
 
     if (!getAccessToken()) {
       setActionError("로그인 후 공간 문의를 보낼 수 있습니다.");
       setActionMessage(null);
-      return false;
+      return null;
     }
 
     const availableBlock = schedules
@@ -121,7 +121,7 @@ export function useSpaceDetail(spaceId: number) {
     if (!availableBlock) {
       setActionError("예약 가능한 일정이 없어 문의를 보낼 수 없습니다.");
       setActionMessage(null);
-      return false;
+      return null;
     }
 
     const startTime = new Date(availableBlock.start_time);
@@ -136,20 +136,20 @@ export function useSpaceDetail(spaceId: number) {
     setActionMessage(null);
 
     try {
-      await createMatching({
+      const response = await createMatching({
         space_id: space.space_id,
         start_time: availableBlock.start_time,
         end_time: availableBlock.end_time,
         total_price: totalPrice,
       });
       setActionMessage("공간 문의를 보냈습니다.");
-      return true;
+      return response.data.matching_id;
     } catch (requestError) {
       const message = axios.isAxiosError<{ message?: string }>(requestError)
         ? requestError.response?.data?.message
         : undefined;
       setActionError(message ?? "공간 문의를 보내지 못했습니다.");
-      return false;
+      return null;
     } finally {
       setIsRequestingMatching(false);
     }

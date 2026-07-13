@@ -46,7 +46,7 @@ export default function MessageDropdown({ items = [], isLoading = false, error, 
           </div>
         </article>
       ))}
-      <Button className="h-[42px] w-full rounded-[12px] bg-[#222831] text-[14px] hover:bg-[#222831]" disabled={isLoading} fullWidth size="custom">
+      <Button className="h-[42px] w-full rounded-[12px] bg-[#222831] text-[14px] hover:bg-[#222831]" fullWidth href="/chat" size="custom">
         전체 메시지 보기
       </Button>
     </section>

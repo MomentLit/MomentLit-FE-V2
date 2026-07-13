@@ -12,3 +12,4 @@
 | /search | SearchPage | 장소/팝업 검색 페이지 | O |
 | /spaces/create | SpaceCreatePage | 장소 만들기 | O |
 | /spaces/:spaceId/edit | SpaceEditPage | 내가 등록한 공간 수정 페이지 | O |
+| /chat | ChatPage | 공간 문의(매칭) 기반 채팅 페이지. `?matchingId=` 쿼리로 특정 대화방을 선택할 수 있음 | O |

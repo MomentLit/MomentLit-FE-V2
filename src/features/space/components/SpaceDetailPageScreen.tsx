@@ -168,7 +168,10 @@ export default function SpaceDetailPageScreen({ spaceId }: SpaceDetailPageScreen
                 <button
                   className="flex h-[46px] w-full items-center justify-center rounded-[12px] bg-[#00ADB5] text-[15px] font-bold text-white hover:bg-[#00979E] disabled:cursor-not-allowed disabled:opacity-70"
                   disabled={detail.isOwner || detail.isRequestingMatching}
-                  onClick={() => void detail.requestMatching()}
+                  onClick={async () => {
+                    const matchingId = await detail.requestMatching();
+                    if (matchingId) router.push(`/chat?matchingId=${matchingId}`);
+                  }}
                   type="button"
                 >
                   {detail.isRequestingMatching ? "문의 중" : "공간 문의하기"}
