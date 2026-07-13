@@ -12,3 +12,4 @@
 | /search | SearchPage | 장소/팝업 검색 페이지 | O |
 | /spaces/create | SpaceCreatePage | 장소 만들기 | O |
 | /spaces/:spaceId/edit | SpaceEditPage | 내가 등록한 공간 수정 페이지 | O |
+| /popups/create | PopupCreatePage | 승인된 매칭을 기반으로 팝업 등록 | O |
