@@ -1,1 +1,2 @@
-export { getSpacePopupHistory } from "./get";
+export * from "./get";
+export * from "./post";
