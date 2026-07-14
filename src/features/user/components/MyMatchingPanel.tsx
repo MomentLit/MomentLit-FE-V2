@@ -16,10 +16,10 @@ type MyMatchingPanelProps = {
 const formatCount = (value: number) => String(value).padStart(2, "0");
 const formatDate = (value: string) => new Intl.DateTimeFormat("ko-KR", { month: "numeric", day: "numeric" }).format(new Date(value));
 const statusText: Record<MatchingListSearchResponse["status"], string> = {
-  APPROVED: "수락됨",
-  CANCELED: "취소됨",
-  REJECTED: "거절됨",
-  REQUESTED: "검토 대기",
+  APPROVED: "수락",
+  CANCELED: "",
+  REJECTED: "거절",
+  REQUESTED: "",
 };
 const getMatchingSpaceLabel = (matching: MatchingListSearchResponse) =>
   matching.space_name?.trim() || matching.address?.trim() || "공간 정보 없음";
