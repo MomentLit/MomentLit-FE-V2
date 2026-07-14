@@ -694,6 +694,21 @@ LoginForm
 * 백엔드가 반환한 access/refresh token은 현재 인증 정책에 따라 `localStorage`에 저장한다.
 * Google Console과 백엔드의 redirect URI는 프런트엔드 `/auth/oauth/google/callback`과 완전히 일치해야 한다.
 
+### 실시간 통신 (WebSocket/STOMP)
+
+채팅처럼 실시간 송수신이 필요한 기능은 REST 대신 STOMP over WebSocket을 사용한다.
+
+```text
+연결 endpoint: /ws/chat
+Client SEND prefix: /app
+Broker subscribe prefix: /topic, /queue
+```
+
+* 방/기록 조회·생성처럼 상태를 변경하지 않는 조회성 데이터는 기존 REST(`apis/{domain}`)로 가져온다.
+* 실시간 송신/수신만 `@stomp/stompjs` 클라이언트로 처리하며, 관련 코드는 `features/{domain}/hooks`에 훅으로 캡슐화한다(예: `features/chat/hooks/useChatSocket.ts`).
+* STOMP CONNECT 시 native header에 `Authorization: Bearer {access_token}`을 담아 인증한다.
+* WebSocket 연결 주소는 `NEXT_PUBLIC_WS_BASE_URL` 환경 변수로 관리하며, REST의 `/api` rewrite 프록시와 달리 브라우저가 백엔드 origin에 직접 연결한다(Next.js rewrite는 WebSocket upgrade를 프록시하지 않기 때문).
+
 ---
 
 ## 9. 상태 관리 기준

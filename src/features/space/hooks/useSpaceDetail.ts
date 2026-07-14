@@ -4,6 +4,7 @@ import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { getAccessToken } from "@/apis/auth/tokenStorage";
+import { createChatRoom } from "@/apis/chat";
 import { createMatching } from "@/apis/matching";
 import { getSchedules } from "@/apis/schedule";
 import { deleteSpace, getMySpaces, getSpaceDetail, getSpaces } from "@/apis/space";
@@ -21,6 +22,7 @@ export function useSpaceDetail(spaceId: number) {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRequestingMatching, setIsRequestingMatching] = useState(false);
+  const [isStartingChat, setIsStartingChat] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -105,12 +107,12 @@ export function useSpaceDetail(spaceId: number) {
   }, [isDeleting, isOwner, spaceId]);
 
   const requestMatching = useCallback(async () => {
-    if (!space || isOwner || isRequestingMatching) return false;
+    if (!space || isOwner || isRequestingMatching) return null;
 
     if (!getAccessToken()) {
       setActionError("로그인 후 공간 문의를 보낼 수 있습니다.");
       setActionMessage(null);
-      return false;
+      return null;
     }
 
     const availableBlock = schedules
@@ -121,7 +123,7 @@ export function useSpaceDetail(spaceId: number) {
     if (!availableBlock) {
       setActionError("예약 가능한 일정이 없어 문의를 보낼 수 없습니다.");
       setActionMessage(null);
-      return false;
+      return null;
     }
 
     const startTime = new Date(availableBlock.start_time);
@@ -136,24 +138,44 @@ export function useSpaceDetail(spaceId: number) {
     setActionMessage(null);
 
     try {
-      await createMatching({
+      const response = await createMatching({
         space_id: space.space_id,
         start_time: availableBlock.start_time,
         end_time: availableBlock.end_time,
         total_price: totalPrice,
       });
       setActionMessage("공간 문의를 보냈습니다.");
-      return true;
+      return response.data.matching_id;
     } catch (requestError) {
       const message = axios.isAxiosError<{ message?: string }>(requestError)
         ? requestError.response?.data?.message
         : undefined;
       setActionError(message ?? "공간 문의를 보내지 못했습니다.");
-      return false;
+      return null;
     } finally {
       setIsRequestingMatching(false);
     }
   }, [isOwner, isRequestingMatching, schedules, space]);
+
+  const startChat = useCallback(async () => {
+    if (!space || isOwner || isStartingChat) return null;
+
+    setIsStartingChat(true);
+    setActionError(null);
+
+    try {
+      const response = await createChatRoom({ space_id: space.space_id });
+      return response.data.chat_room_id;
+    } catch (requestError) {
+      const message = axios.isAxiosError<{ message?: string }>(requestError)
+        ? requestError.response?.data?.message
+        : undefined;
+      setActionError(message ?? "채팅방을 여는데 실패했습니다.");
+      return null;
+    } finally {
+      setIsStartingChat(false);
+    }
+  }, [isOwner, isStartingChat, space]);
 
   const scheduleSummary = useMemo(() => {
     const dates = schedules
@@ -184,10 +206,12 @@ export function useSpaceDetail(spaceId: number) {
     isLoading,
     isOwner,
     isRequestingMatching,
+    isStartingChat,
     ownerProfile,
     relatedSpaces,
     requestMatching,
     scheduleSummary,
     space,
+    startChat,
   };
 }
